@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SyncPmsReservation;
 use App\Mail\BookingAdminNotification;
 use App\Mail\BookingConfirmation;
 use App\Models\Booking;
@@ -118,8 +119,8 @@ class HomeController extends Controller
             'check_out' => $validated['check_out'],
             'guests' => $validated['guests'],
             'total_amount' => $totalAmount,
-            'room_type' => $validated['room_type'],
-            'room_id' => $validated['room_id'],
+            'room_type' => $validated['room_type'] ?? null,
+            'room_id' => $validated['room_id'] ?? null,
             'notes' => $validated['notes'] ?? '',
             'status' => 'pending',
             'source' => 'website',
@@ -133,8 +134,8 @@ class HomeController extends Controller
             Log::warning('Failed to send booking email', ['error' => $e->getMessage()]);
         }
 
-        // Try to create via PMS API (additional sync)
-        $result = $pms->createReservation([
+        // Dispatch queue job to sync reservation to PMS API (async, auto-retry)
+        SyncPmsReservation::dispatch($booking, [
             'guest_name' => $validated['name'],
             'guest_email' => $validated['email'],
             'guest_phone' => $validated['phone'],
@@ -146,20 +147,6 @@ class HomeController extends Controller
             'ota_source' => 'website',
             'ota_reservation_number' => $booking->booking_code,
         ]);
-
-        if ($result['success']) {
-            // Simpan nomor reservasi dari PMS
-            $pmsData = $result['data']['data'] ?? $result['data'] ?? [];
-            $pmsResNumber = $pmsData['reservation_number'] ?? null;
-            if ($pmsResNumber) {
-                $booking->update(['pms_reservation_number' => $pmsResNumber]);
-            }
-        } else {
-            Log::warning('PMS API createReservation failed', [
-                'errors' => $result['errors'] ?? 'unknown',
-                'data' => $validated,
-            ]);
-        }
 
         return redirect()->route('booking.confirmation', $booking)
             ->with('success', 'Booking request submitted successfully! Please complete the payment to secure your room.');
