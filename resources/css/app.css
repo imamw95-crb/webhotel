@@ -1,0 +1,564 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@theme {
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-display: 'Playfair Display', ui-serif, Georgia, serif;
+
+    --color-navy-800: #1B2A4A;
+    --color-navy-900: #0f1b30;
+
+    --color-gold-400: #D4AF37;
+    --color-gold-500: #c4a030;
+    --color-gold-600: #b08d28;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+    background: #1B2A4A;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #D4AF37;
+}
+
+/* Selection color */
+::selection {
+    background: #D4AF37;
+    color: #1B2A4A;
+}
+
+/* =====================================
+   ANIMATIONS & KEYFRAMES
+   ===================================== */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse-gold {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4); }
+    50% { box-shadow: 0 0 0 15px rgba(212, 175, 55, 0); }
+}
+
+@keyframes countUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Animate on scroll helper */
+.reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Staggered reveal for children */
+.reveal-stagger > .reveal-child:nth-child(1) { transition-delay: 0ms; }
+.reveal-stagger > .reveal-child:nth-child(2) { transition-delay: 100ms; }
+.reveal-stagger > .reveal-child:nth-child(3) { transition-delay: 200ms; }
+.reveal-stagger > .reveal-child:nth-child(4) { transition-delay: 300ms; }
+.reveal-stagger > .reveal-child:nth-child(5) { transition-delay: 400ms; }
+.reveal-stagger > .reveal-child:nth-child(6) { transition-delay: 500ms; }
+.reveal-stagger > .reveal-child:nth-child(7) { transition-delay: 600ms; }
+.reveal-stagger > .reveal-child:nth-child(8) { transition-delay: 700ms; }
+.reveal-stagger > .reveal-child:nth-child(9) { transition-delay: 800ms; }
+
+/* Hero text animation */
+.hero-title {
+    animation: fadeInUp 1s ease both;
+}
+.hero-subtitle {
+    animation: fadeInUp 1s ease 0.2s both;
+}
+.hero-booking {
+    animation: fadeInUp 1s ease 0.4s both;
+}
+
+/* Hero overlay pattern */
+.hero-overlay {
+    background:
+        radial-gradient(ellipse at 20% 50%, rgba(212, 175, 55, 0.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 50%, rgba(212, 175, 55, 0.05) 0%, transparent 60%),
+        linear-gradient(to bottom, rgba(15, 27, 48, 0.3) 0%, rgba(15, 27, 48, 0.6) 100%);
+}
+
+/* Hero pattern dots */
+.hero-pattern {
+    background-image: radial-gradient(rgba(212, 175, 55, 0.1) 1px, transparent 1px);
+    background-size: 30px 30px;
+}
+
+/* Date input styling for hero panel */
+input[type="date"] {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    color-scheme: light;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+/* Room card image zoom */
+.room-card-img {
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.room-card:hover .room-card-img {
+    transform: scale(1.08);
+}
+
+/* Booking panel hover transitions */
+.booking-room-card {
+    transition: all 0.2s ease;
+}
+.booking-room-card:hover {
+    transform: translateY(-1px);
+}
+
+/* =====================================
+   EXPLORE OUR SPACES
+   ===================================== */
+
+/* --- Masonry Grid (CSS Columns) --- */
+.spaces-grid {
+    columns: 3;
+    column-gap: 16px;
+    perspective: 1400px;
+}
+@media (max-width: 1024px) {
+    .spaces-grid { columns: 2; column-gap: 14px; }
+}
+@media (max-width: 640px) {
+    .spaces-grid { columns: 1; column-gap: 0; }
+}
+
+/* --- Space Card --- */
+.space-card {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    cursor: pointer;
+    break-inside: avoid;
+    margin-bottom: 16px;
+    display: inline-block;
+    width: 100%;
+}
+@media (max-width: 640px) {
+    .space-card { margin-bottom: 12px; }
+}
+
+/* --- 3D Flip Entrance Animation --- */
+.spaces-grid.stagger > * {
+    opacity: 0;
+    transform: translateY(50px) rotateX(18deg);
+    transform-origin: top center;
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform, opacity;
+}
+
+.spaces-grid.stagger.in > * {
+    opacity: 1;
+    transform: translateY(0) rotateX(0deg);
+}
+
+/* Card inner */
+.space-card-inner {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 20px;
+}
+
+.space-card-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: opacity 0.8s ease,
+                transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.space-card:hover .space-card-img {
+    transform: scale(1.08);
+}
+/* Back image layer for crossfade - inherits same hover scale */
+.sc-back-img {
+    pointer-events: none;
+}
+
+/* Cinematic overlay */
+.space-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to top,
+        rgba(15, 27, 48, 0.92) 0%,
+        rgba(15, 27, 48, 0.4) 30%,
+        rgba(15, 27, 48, 0.05) 55%,
+        transparent 75%
+    );
+    display: flex;
+    align-items: flex-end;
+    padding: 28px 24px;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.space-card:hover .space-card-overlay {
+    background: linear-gradient(
+        to top,
+        rgba(15, 27, 48, 0.95) 0%,
+        rgba(15, 27, 48, 0.5) 35%,
+        rgba(15, 27, 48, 0.1) 60%,
+        transparent 80%
+    );
+}
+
+.space-card-content {
+    position: relative;
+    z-index: 2;
+}
+
+.space-card-count {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(212, 175, 55, 0.9);
+    background: rgba(212, 175, 55, 0.12);
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 8px;
+}
+
+.space-card-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 500;
+    color: #fff;
+    margin: 0 0 10px;
+    line-height: 1.2;
+}
+.space-wide .space-card-title { font-size: 26px; }
+.space-wide .space-card-btn { padding: 10px 22px; font-size: 14px; }
+
+.space-card-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    padding: 8px 18px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+}
+.space-card:hover .space-card-btn {
+    background: #D4AF37;
+    color: #1B2A4A;
+    border-color: #D4AF37;
+    gap: 12px;
+}
+.space-card-btn i {
+    font-size: 11px;
+    transition: transform 0.3s ease;
+}
+.space-card:hover .space-card-btn i {
+    transform: translateX(4px);
+}
+
+/* Gold border glow on hover */
+.space-card-inner::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    border: 2px solid transparent;
+    background: linear-gradient(135deg, #D4AF37, rgba(212, 175, 55, 0.1), transparent 60%) border-box;
+    -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    z-index: 3;
+    pointer-events: none;
+}
+.space-card:hover .space-card-inner::after {
+    opacity: 1;
+}
+
+/* =====================================
+   SPACE CAROUSEL (Full-screen Modal)
+   ===================================== */
+.space-carousel {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+.space-carousel.open {
+    display: flex;
+    animation: scFadeIn 0.3s ease both;
+}
+
+.sc-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.94);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+}
+
+@keyframes scFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Close button */
+.sc-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+.sc-close:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    transform: rotate(90deg);
+}
+
+/* Nav buttons */
+.sc-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+.sc-nav:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+    border-color: rgba(212, 175, 55, 0.3);
+}
+.sc-prev { left: 20px; }
+.sc-next { right: 20px; }
+@media (max-width: 640px) {
+    .sc-nav { display: none; }
+}
+
+/* Main image area */
+.sc-main {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    max-width: 88vw;
+    max-height: 85vh;
+}
+
+.sc-counter {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    padding: 5px 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 12px;
+}
+
+.sc-image {
+    max-width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sc-image.loaded {
+    opacity: 1;
+    transform: scale(1);
+}
+.sc-image.slide-next {
+    animation: scSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.sc-image.slide-prev {
+    animation: scSlideInPrev 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes scSlideIn {
+    from { opacity: 0; transform: scale(0.92) translateX(30px); }
+    to { opacity: 1; transform: scale(1) translateX(0); }
+}
+@keyframes scSlideInPrev {
+    from { opacity: 0; transform: scale(0.92) translateX(-30px); }
+    to { opacity: 1; transform: scale(1) translateX(0); }
+}
+
+.sc-caption {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+    font-weight: 500;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(12px);
+    padding: 8px 22px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    margin-top: 12px;
+    max-width: 80vw;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Thumbnail strip */
+.sc-thumbs {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    max-width: 80vw;
+    overflow-x: auto;
+    padding: 4px;
+    scrollbar-width: none;
+    z-index: 5;
+}
+.sc-thumbs::-webkit-scrollbar { display: none; }
+.sc-thumb {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    opacity: 0.4;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    flex-shrink: 0;
+}
+.sc-thumb:hover { opacity: 0.7; }
+.sc-thumb.active {
+    opacity: 1;
+    border-color: #D4AF37;
+}
+.sc-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Stat card animation */
+.stat-card {
+    transition: all 0.3s ease;
+}
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(212, 175, 55, 0.15);
+}
+
+/* Facility card hover */
+.facility-card {
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.facility-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Smooth section transitions */
+section {
+    transition: background-color 0.3s ease;
+}
+
+/* Booking room select animation */
+.room-select-enter {
+    animation: fadeInUp 0.4s ease both;
+}
+
+/* Loading shimmer effect */
+.shimmer {
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+}
+
+/* WhatsApp button pulse */
+.whatsapp-pulse {
+    animation: pulse-gold 2s infinite;
+}
