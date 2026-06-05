@@ -316,24 +316,32 @@ document.addEventListener('DOMContentLoaded', function () {
                     </div>
                     <div class="bw-field-content">
                         <label class="bw-label">Check-in</label>
-                        <input type="date" class="bw-input" id="av-checkin"
-                               min="{{ date('Y-m-d') }}"
-                               value="{{ old('check_in', date('Y-m-d')) }}">
-                    </div>
-                </div>
-
-                <div class="bw-separator"></div>
-
-                {{-- Check-out --}}
-                <div class="bw-field bw-field-date">
-                    <div class="bw-field-icon">
-                        <i class="fa-regular fa-calendar"></i>
-                    </div>
-                    <div class="bw-field-content">
-                        <label class="bw-label">Check-out</label>
-                        <input type="date" class="bw-input" id="av-checkout"
-                               min="{{ date('Y-m-d', strtotime('+1 day')) }}"
-                               value="{{ old('check_out', date('Y-m-d', strtotime('+1 day'))) }}">
+                        <div class="bw-date-range">
+                            <div class="bw-date-slot">
+                                <input type="date" class="bw-input" id="av-checkin"
+                                       min="{{ date('Y-m-d') }}"
+                                       value="{{ old('check_in', date('Y-m-d')) }}">
+                                <span class="bw-date-display" id="checkin-display">
+                                    <span id="checkin-date-text">{{ date('D, d M Y') }}</span>
+                                    <span class="date-day">Today</span>
+                                </span>
+                            </div>
+                            <div class="bw-date-range-connector">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M5 12h14M13 5l7 7-7 7"/>
+                                </svg>
+                            </div>
+                            <div class="bw-date-slot">
+                                <input type="date" class="bw-input" id="av-checkout"
+                                       min="{{ date('Y-m-d', strtotime('+1 day')) }}"
+                                       value="{{ old('check_out', date('Y-m-d', strtotime('+1 day'))) }}">
+                                <span class="bw-date-display" id="checkout-display">
+                                    <span id="checkout-date-text">{{ date('D, d M Y', strtotime('+1 day')) }}</span>
+                                    <span class="date-day">Tomorrow</span>
+                                </span>
+                            </div>
+                            <span class="bw-night-count" id="night-count">1 Night</span>
+                        </div>
                     </div>
                 </div>
 
@@ -375,10 +383,178 @@ document.addEventListener('DOMContentLoaded', function () {
     </div>
 </div>
 
+{{-- Custom Calendar Popup --}}
+<div class="bw-calendar" id="bwCalendar" role="dialog" aria-label="Date picker" aria-hidden="true">
+    <div class="bw-cal-inner">
+        <div class="bw-cal-header">
+            <button type="button" class="bw-cal-nav" id="cal-prev" aria-label="Previous month">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <div class="bw-cal-title" id="cal-title">June 2026</div>
+            <button type="button" class="bw-cal-nav" id="cal-next" aria-label="Next month">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+        </div>
+        <div class="bw-cal-days">
+            <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+        </div>
+        <div class="bw-cal-grid" id="cal-grid" role="grid" aria-label="Calendar days"></div>
+        <div class="bw-cal-footer">
+            <button type="button" class="bw-cal-footer-btn" id="cal-today">Today</button>
+            <button type="button" class="bw-cal-footer-btn secondary" id="cal-clear">Clear</button>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // ============================================================
+    // DOM refs
+    // ============================================================
+    const checkin     = document.getElementById('av-checkin');
+    const checkout    = document.getElementById('av-checkout');
+    const ciDisplay   = document.getElementById('checkin-display');
+    const coDisplay   = document.getElementById('checkout-display');
+    const ciText      = document.getElementById('checkin-date-text');
+    const coText      = document.getElementById('checkout-date-text');
+    const nightCount  = document.getElementById('night-count');
+    const ciSlot      = document.querySelector('#av-checkin').closest('.bw-date-slot');
+    const coSlot      = document.querySelector('#av-checkout').closest('.bw-date-slot');
+
+    // Calendar DOM refs
+    const calendar    = document.getElementById('bwCalendar');
+    const calGrid     = document.getElementById('cal-grid');
+    const calTitle    = document.getElementById('cal-title');
+    const calPrev     = document.getElementById('cal-prev');
+    const calNext     = document.getElementById('cal-next');
+    const calToday    = document.getElementById('cal-today');
+    const calClear    = document.getElementById('cal-clear');
+
+    // ============================================================
+    // Calendar state
+    // ============================================================
+    let activeInput = null;       // 'checkin' or 'checkout'
+    let viewYear    = 2026;
+    let viewMonth   = 5;          // 0-indexed (June)
+
+    const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+    // ============================================================
+    // Helpers
+    // ============================================================
+    function parseDate(str) {
+        if (!str) return null;
+        const parts = str.split('-');
+        return new Date(parts[0], parts[1] - 1, parts[2]);
+    }
+
+    function formatDisplay(date) {
+        const d = date.getDate();
+        const day = DAYS[date.getDay()];
+        const mon = MONTHS[date.getMonth()].substring(0,3);
+        const y = date.getFullYear();
+        return day + ', ' + d + ' ' + mon + ' ' + y;
+    }
+
+    function toDateStr(date) {
+        return date.getFullYear() + '-'
+            + String(date.getMonth() + 1).padStart(2,'0') + '-'
+            + String(date.getDate()).padStart(2,'0');
+    }
+
+    function dayLabel(date) {
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const target = new Date(date);
+        target.setHours(0,0,0,0);
+        const diff = Math.round((target - today) / 86400000);
+        if (diff === 0) return 'Today';
+        if (diff === 1) return 'Tomorrow';
+        if (diff === -1) return 'Yesterday';
+        return '';
+    }
+
+    function daysBetween(a, b) {
+        const diff = Math.round((b - a) / 86400000);
+        return diff > 0 ? diff : 0;
+    }
+
+    function normalizeDate(date) {
+        const d = new Date(date);
+        d.setHours(0,0,0,0);
+        return d;
+    }
+
+    function updateDateDisplay() {
+        const ci = parseDate(checkin.value);
+        const co = parseDate(checkout.value);
+        if (!ci) return;
+
+        ciText.textContent = formatDisplay(ci);
+        ciDisplay.querySelector('.date-day').textContent = dayLabel(ci);
+
+        if (co) {
+            coText.textContent = formatDisplay(co);
+            coDisplay.querySelector('.date-day').textContent = dayLabel(co);
+            const nights = daysBetween(ci, co);
+            nightCount.textContent = nights + ' Night' + (nights > 1 ? 's' : '');
+            nightCount.style.display = 'inline-flex';
+        } else {
+            coText.textContent = 'Select date';
+            coDisplay.querySelector('.date-day').textContent = '';
+            nightCount.style.display = 'none';
+        }
+    }
+
+    // ============================================================
+    // Auto-select checkout when checkin changes
+    // ============================================================
+    function onCheckinChange() {
+        const ci = parseDate(checkin.value);
+        const co = parseDate(checkout.value);
+        if (!ci) return;
+
+        if (!co || co <= ci) {
+            const next = new Date(ci);
+            next.setDate(ci.getDate() + 1);
+            checkout.value = toDateStr(next);
+            checkout.min = checkin.value;
+        }
+
+        if (ciSlot) {
+            ciSlot.classList.remove('bw-date-updated');
+            void ciSlot.offsetWidth;
+            ciSlot.classList.add('bw-date-updated');
+        }
+        updateDateDisplay();
+    }
+
+    function onCheckoutChange() {
+        const ci = parseDate(checkin.value);
+        const co = parseDate(checkout.value);
+        if (ci && co && co <= ci) {
+            const next = new Date(ci);
+            next.setDate(ci.getDate() + 1);
+            checkout.value = toDateStr(next);
+        }
+        checkout.min = checkin.value;
+
+        if (coSlot) {
+            coSlot.classList.remove('bw-date-updated');
+            void coSlot.offsetWidth;
+            coSlot.classList.add('bw-date-updated');
+        }
+        updateDateDisplay();
+    }
+
+    checkin.addEventListener('change', onCheckinChange);
+    checkout.addEventListener('change', onCheckoutChange);
+
+    // ============================================================
     // Booking Widget Mobile Toggle
+    // ============================================================
     const toggle = document.getElementById('bwToggle');
     const body = document.getElementById('bwBody');
     if (toggle && body) {
@@ -389,30 +565,209 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // ============================================================
     // Quick select buttons
+    // ============================================================
     document.querySelectorAll('.bw-q-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const days = parseInt(this.dataset.days);
-            const checkin = document.getElementById('av-checkin');
-            const checkout = document.getElementById('av-checkout');
             if (!checkin || !checkout) return;
 
             const today = new Date();
-            const checkinDate = new Date(today);
-            checkin.value = checkinDate.toISOString().split('T')[0];
+            today.setHours(0,0,0,0);
+            checkin.value = toDateStr(today);
 
-            const checkoutDate = new Date(today);
-            checkoutDate.setDate(today.getDate() + days);
-            checkout.value = checkoutDate.toISOString().split('T')[0];
-
-            // Update checkout min
+            const coDate = new Date(today);
+            coDate.setDate(today.getDate() + days);
+            checkout.value = toDateStr(coDate);
             checkout.min = checkin.value;
 
-            // Visual feedback
             document.querySelectorAll('.bw-q-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
+            updateDateDisplay();
         });
     });
+
+    // ============================================================
+    // CUSTOM CALENDAR POPUP
+    // ============================================================
+
+    // --- Open calendar ---
+    function openCalendar(target) {
+        activeInput = target; // 'checkin' or 'checkout'
+        const inputEl = target === 'checkin' ? checkin : checkout;
+        const dt = parseDate(inputEl.value) || new Date();
+        viewYear  = dt.getFullYear();
+        viewMonth = dt.getMonth();
+        renderCalendar();
+        calendar.classList.add('open');
+        calendar.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeCalendar() {
+        calendar.classList.remove('open');
+        calendar.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        activeInput = null;
+    }
+
+    // --- Render calendar grid ---
+    function renderCalendar() {
+        calTitle.textContent = MONTHS[viewMonth] + ' ' + viewYear;
+
+        const today    = normalizeDate(new Date());
+        const ci       = parseDate(checkin.value);
+        const co       = parseDate(checkout.value);
+        const minRaw   = activeInput === 'checkin'
+            ? normalizeDate(new Date())
+            : (ci ? normalizeDate(new Date(ci.getTime() + 86400000)) : normalizeDate(new Date()));
+
+        const firstDay = new Date(viewYear, viewMonth, 1);
+        const lastDay  = new Date(viewYear, viewMonth + 1, 0);
+        const startDow = firstDay.getDay(); // 0=Sun
+        const daysInMonth = lastDay.getDate();
+
+        // Previous month trailing days
+        const prevLast = new Date(viewYear, viewMonth, 0);
+        const prevDays = prevLast.getDate();
+
+        let html = '';
+        let dayCount = 0;
+
+        // Previous month cells
+        for (let i = startDow - 1; i >= 0; i--) {
+            const d = prevDays - i;
+            const dt = new Date(viewYear, viewMonth - 1, d);
+            html += '<button type="button" class="bw-cal-day other-month" disabled>' + d + '</button>';
+            dayCount++;
+        }
+
+        // Current month cells
+        for (let d = 1; d <= daysInMonth; d++) {
+            const dt = new Date(viewYear, viewMonth, d);
+            const dtNorm = normalizeDate(dt);
+            const dateStr = toDateStr(dt);
+            const isToday  = dtNorm.getTime() === today.getTime();
+            const isMin    = dtNorm.getTime() < minRaw.getTime();
+            const isSelected = (activeInput === 'checkin' && ci && dtNorm.getTime() === normalizeDate(ci).getTime())
+                           || (activeInput === 'checkout' && co && dtNorm.getTime() === normalizeDate(co).getTime());
+            const inRange = ci && co
+                && dtNorm.getTime() > normalizeDate(ci).getTime()
+                && dtNorm.getTime() < normalizeDate(co).getTime();
+            const isRangeStart = ci && dtNorm.getTime() === normalizeDate(ci).getTime();
+            const isRangeEnd   = co && dtNorm.getTime() === normalizeDate(co).getTime();
+
+            let cls = 'bw-cal-day';
+            if (isToday) cls += ' today';
+            if (isSelected) cls += ' selected';
+            if (isMin) cls += ' disabled';
+            if (inRange) cls += ' in-range';
+            if (isRangeStart && activeInput === 'checkout') cls += ' range-start';
+            if (isRangeEnd && activeInput === 'checkin') cls += ' range-end';
+
+            html += '<button type="button" class="' + cls + '" data-date="' + dateStr + '"'
+                 + (isMin ? ' disabled' : '')
+                 + '>' + d + '</button>';
+            dayCount++;
+        }
+
+        // Fill remaining cells
+        const remaining = 42 - dayCount;
+        for (let d = 1; d <= remaining; d++) {
+            html += '<button type="button" class="bw-cal-day other-month" disabled>' + d + '</button>';
+        }
+
+        calGrid.innerHTML = html;
+
+        // Attach click events to day buttons
+        calGrid.querySelectorAll('.bw-cal-day:not(.disabled):not(.other-month)').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const dateStr = this.dataset.date;
+                selectDate(dateStr);
+            });
+        });
+    }
+
+    // --- Select a date ---
+    function selectDate(dateStr) {
+        const inputEl = activeInput === 'checkin' ? checkin : checkout;
+        inputEl.value = dateStr;
+
+        // Update min for checkout
+        if (activeInput === 'checkin') {
+            checkout.min = checkin.value;
+        }
+
+        // Trigger change event for auto-select logic
+        inputEl.dispatchEvent(new Event('change', { bubbles: true }));
+
+        // If selecting checkin and checkout is empty/behind, auto-update
+        if (activeInput === 'checkin') {
+            onCheckinChange();
+        } else {
+            onCheckoutChange();
+        }
+
+        closeCalendar();
+    }
+
+    // --- Navigation ---
+    calPrev.addEventListener('click', () => {
+        viewMonth--;
+        if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+        renderCalendar();
+    });
+
+    calNext.addEventListener('click', () => {
+        viewMonth++;
+        if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+        renderCalendar();
+    });
+
+    // --- Today button ---
+    calToday.addEventListener('click', () => {
+        const today = new Date();
+        viewYear  = today.getFullYear();
+        viewMonth = today.getMonth();
+        renderCalendar();
+        selectDate(toDateStr(today));
+    });
+
+    // --- Clear button ---
+    calClear.addEventListener('click', () => {
+        closeCalendar();
+    });
+
+    // --- Open calendar on slot click ---
+    ciSlot.addEventListener('click', (e) => {
+        if (e.target.tagName === 'INPUT') return;
+        e.stopPropagation();
+        openCalendar('checkin');
+    });
+
+    coSlot.addEventListener('click', (e) => {
+        if (e.target.tagName === 'INPUT') return;
+        e.stopPropagation();
+        openCalendar('checkout');
+    });
+
+    // --- Close on backdrop click ---
+    calendar.addEventListener('click', (e) => {
+        if (e.target === calendar) closeCalendar();
+    });
+
+    // --- Close on Escape ---
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && calendar.classList.contains('open')) {
+            closeCalendar();
+        }
+    });
+
+    // ============================================================
+    // Initial render
+    // ============================================================
+    updateDateDisplay();
 });
 </script>
 @endpush
