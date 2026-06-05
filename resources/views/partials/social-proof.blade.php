@@ -11,7 +11,7 @@
                     <i class="fa-solid fa-building"></i>
                 </div>
                 <div class="sp-content">
-                    <span class="sp-number count-num" data-target="29">0</span>
+                    <span class="sp-number count-num" data-target="31">0</span>
                     <span class="sp-label">Luxury Rooms</span>
                 </div>
             </div>
