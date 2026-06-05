@@ -28,21 +28,37 @@
 @include('partials.rooms')
 
 {{-- ============================================ --}}
+{{-- SOCIAL PROOF BAR --}}
+{{-- ============================================ --}}
+@include('partials.social-proof')
+
+{{-- ============================================ --}}
 {{-- FACILITIES SECTION --}}
 {{-- ============================================ --}}
 @include('partials.facilities')
 
-
+{{-- ============================================ --}}
+{{-- OFFERS & PACKAGES SECTION --}}
+{{-- ============================================ --}}
+@include('partials.offers')
 
 {{-- ============================================ --}}
-{{-- EXPLORE OUR SPACES SECTION --}}
+{{-- TESTIMONIALS SECTION --}}
 {{-- ============================================ --}}
-<section id="explore-spaces" class="section-padding">
+@include('partials.testimonials')
+
+{{-- ============================================ --}}
+{{-- EXPLORE OUR SPACES SECTION — BENTO GRID --}}
+{{-- ============================================ --}}
+<section id="explore-spaces" class="section-padding" aria-labelledby="explore-heading">
     <div class="section-container">
         <div class="text-center mb-16 reveal">
             <span class="sec-label">{{ $sections['gallery_intro']['subtitle'] ?? 'Discover' }}</span>
-            <h2 class="section-title">Explore Our Spaces</h2>
+            <h2 id="explore-heading" class="section-title">Explore Our Spaces</h2>
             <div class="gold-line centered"></div>
+            <p class="text-secondary" style="max-width:600px;margin:0 auto;color:var(--text-secondary);font-size:15px;">
+                Take a visual tour through our rooms, facilities, and surroundings
+            </p>
         </div>
 
         @php
@@ -52,8 +68,13 @@
         @endphp
 
         @if($spaceCategories->count() > 0)
-            <div id="spaces-grid" class="spaces-grid stagger">
-                @foreach($spaceCategories as $cat => $imgs)
+            @php
+                $sorted = $spaceCategories->sortByDesc(fn($imgs) => $imgs->count());
+                $idx = 0;
+                $total = $sorted->count();
+            @endphp
+            <div id="spaces-grid" class="spaces-grid stagger" role="list" aria-label="Photo gallery categories">
+                @foreach($sorted as $cat => $imgs)
                     @php
                         $first = $imgs->first();
                         $count = $imgs->count();
@@ -61,11 +82,22 @@
                             'src' => asset('storage/' . $i->image_path),
                             'title' => $i->title,
                         ]);
+                        $sizeClass = '';
+                        if ($idx === 0 && $total > 2) {
+                            $sizeClass = 'space-featured';
+                        } elseif ($idx % 3 === 0 && $total > 4) {
+                            $sizeClass = 'space-wide';
+                        }
+                        $idx++;
                     @endphp
-                    <div class="space-card"
+                    <div class="space-card {{ $sizeClass }}"
                          data-category="{{ $cat }}"
-                         data-photos='{{ json_encode($photoData) }}'>
+                         data-photos='{{ json_encode($photoData) }}'
+                         role="listitem"
+                         tabindex="0"
+                         aria-label="{{ $cat }} — {{ $count }} photos">
                         <div class="space-card-inner">
+                            <div class="space-card-skeleton"></div>
                             <img src="{{ asset('storage/' . $first->image_path) }}"
                                  alt="{{ $cat }}"
                                  class="space-card-img"
@@ -75,7 +107,7 @@
                                     <span class="space-card-count">{{ $count }} {{ $count === 1 ? 'Photo' : 'Photos' }}</span>
                                     <h3 class="space-card-title">{{ $cat }}</h3>
                                     <span class="space-card-btn">
-                                        Explore <i class="fa-solid fa-arrow-right"></i>
+                                        Explore <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
                                     </span>
                                 </div>
                             </div>
@@ -84,18 +116,27 @@
                 @endforeach
             </div>
 
+            {{-- View Full Gallery CTA --}}
+            <div class="gallery-cta reveal">
+                <a href="#" class="btn-gold" id="view-all-gallery" aria-label="View full gallery">
+                    <i class="fa-solid fa-images" aria-hidden="true"></i>
+                    View Full Gallery
+                    <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                </a>
+            </div>
+
             {{-- Hidden carousel modal --}}
-            <div id="space-carousel" class="space-carousel" role="dialog" aria-modal="true">
+            <div id="space-carousel" class="space-carousel" role="dialog" aria-modal="true" aria-label="Photo gallery viewer">
                 <div class="sc-backdrop"></div>
-                <button class="sc-close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
-                <button class="sc-nav sc-prev" aria-label="Previous"><i class="fa-solid fa-chevron-left"></i></button>
-                <button class="sc-nav sc-next" aria-label="Next"><i class="fa-solid fa-chevron-right"></i></button>
+                <button class="sc-close" aria-label="Close gallery"><i class="fa-solid fa-xmark"></i></button>
+                <button class="sc-nav sc-prev" aria-label="Previous photo"><i class="fa-solid fa-chevron-left"></i></button>
+                <button class="sc-nav sc-next" aria-label="Next photo"><i class="fa-solid fa-chevron-right"></i></button>
                 <div class="sc-main">
-                    <div class="sc-counter"></div>
+                    <div class="sc-counter" aria-live="polite"></div>
                     <img class="sc-image" src="" alt="">
                     <div class="sc-caption"></div>
                 </div>
-                <div class="sc-thumbs"></div>
+                <div class="sc-thumbs" role="tablist" aria-label="Photo thumbnails"></div>
             </div>
         @else
             {{-- Fallback: static categories --}}
@@ -115,11 +156,29 @@
                     'Depan Hotel' => ['img' => 'gallery/depan-hotel/IMG_20260315_191002_644.jpg', 'count' => 27],
                     'Tampak Depan' => ['img' => 'gallery/tampak-depan/IMG_20260302_093513_414@-249047492.jpg', 'count' => 3],
                 ];
+                // Sort by count desc for bento layout
+                $sortedFallback = collect($fallbackCategories)->sortByDesc('count');
+                $fIdx = 0;
+                $fTotal = $sortedFallback->count();
             @endphp
-            <div id="spaces-grid" class="spaces-grid stagger">
-                @foreach($fallbackCategories as $cat => $data)
-                    <div class="space-card" data-category="{{ $cat }}">
+            <div id="spaces-grid" class="spaces-grid stagger" role="list" aria-label="Photo gallery categories">
+                @foreach($sortedFallback as $cat => $data)
+                    @php
+                        $sizeClass = '';
+                        if ($fIdx === 0 && $fTotal > 2) {
+                            $sizeClass = 'space-featured';
+                        } elseif ($fIdx % 3 === 0 && $fTotal > 4) {
+                            $sizeClass = 'space-wide';
+                        }
+                        $fIdx++;
+                    @endphp
+                    <div class="space-card {{ $sizeClass }}"
+                         data-category="{{ $cat }}"
+                         role="listitem"
+                         tabindex="0"
+                         aria-label="{{ $cat }} — {{ $data['count'] }} photos">
                         <div class="space-card-inner">
+                            <div class="space-card-skeleton"></div>
                             <img src="{{ asset('storage/' . $data['img']) }}"
                                  alt="{{ $cat }}"
                                  class="space-card-img"
@@ -129,13 +188,36 @@
                                     <span class="space-card-count">{{ $data['count'] }} Photos</span>
                                     <h3 class="space-card-title">{{ $cat }}</h3>
                                     <span class="space-card-btn">
-                                        Explore <i class="fa-solid fa-arrow-right"></i>
+                                        Explore <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
                                     </span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 @endforeach
+            </div>
+
+            {{-- View Full Gallery CTA --}}
+            <div class="gallery-cta reveal">
+                <a href="#" class="btn-gold" id="view-all-gallery" aria-label="View full gallery">
+                    <i class="fa-solid fa-images" aria-hidden="true"></i>
+                    View Full Gallery
+                    <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                </a>
+            </div>
+
+            {{-- Hidden carousel modal --}}
+            <div id="space-carousel" class="space-carousel" role="dialog" aria-modal="true" aria-label="Photo gallery viewer">
+                <div class="sc-backdrop"></div>
+                <button class="sc-close" aria-label="Close gallery"><i class="fa-solid fa-xmark"></i></button>
+                <button class="sc-nav sc-prev" aria-label="Previous photo"><i class="fa-solid fa-chevron-left"></i></button>
+                <button class="sc-nav sc-next" aria-label="Next photo"><i class="fa-solid fa-chevron-right"></i></button>
+                <div class="sc-main">
+                    <div class="sc-counter" aria-live="polite"></div>
+                    <img class="sc-image" src="" alt="">
+                    <div class="sc-caption"></div>
+                </div>
+                <div class="sc-thumbs" role="tablist" aria-label="Photo thumbnails"></div>
             </div>
         @endif
     </div>

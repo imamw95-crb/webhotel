@@ -99,6 +99,20 @@
                           placeholder="Any special requests? (optional)"></textarea>
             </div>
 
+            {{-- Math Captcha --}}
+            <div>
+                <label class="bm-label">Verification <span class="text-red-400">*</span></label>
+                <div class="flex items-center gap-3">
+                    <span class="text-sm font-medium text-gray-300 whitespace-nowrap">{{ $captchaQuestion ?? '5 + 2 = ?' }}</span>
+                    <input type="number" name="captcha_answer" id="bm-captcha" required
+                           class="bm-input w-24" placeholder="Answer"
+                           autocomplete="off">
+                </div>
+                @error('captcha_answer')
+                    <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
             {{-- Summary --}}
             <div id="bm-summary" class="bm-summary" style="display:none;">
                 <p class="bm-summary-title">Booking Summary</p>
@@ -163,23 +177,29 @@
 }
 
 .bm-close-btn {
-    width: 32px;
-    height: 32px;
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
     border: none;
-    background: transparent;
+    background: rgba(255, 255, 255, 0.04);
     color: var(--text-muted);
-    font-size: 18px;
+    font-size: 20px;
     cursor: pointer;
-    transition: background 0.2s, color 0.2s;
+    transition: background 0.2s, color 0.2s, transform 0.2s;
 }
 
 .bm-close-btn:hover {
     background: var(--bg-surface-2);
     color: var(--text-primary);
+    transform: rotate(90deg);
+}
+
+.bm-close-btn:focus-visible {
+    outline: 2px solid var(--gold-primary);
+    outline-offset: 2px;
 }
 
 /* ---- Labels ---- */
@@ -368,11 +388,13 @@ window.openBookingModal = function(options) {
     if (options.roomType) document.getElementById('bm-room-type').value = options.roomType;
     if (options.roomId) document.getElementById('bm-room-id').value = options.roomId;
 
-    // Reset name/email/phone/notes
+    // Reset name/email/phone/notes/captcha
     document.getElementById('bm-name').value = '';
     document.getElementById('bm-email').value = '';
     document.getElementById('bm-phone').value = '';
     document.getElementById('bm-notes').value = '';
+    var cap = document.getElementById('bm-captcha');
+    if (cap) cap.value = '';
 
     // Init dates and show
     bmInitDates();

@@ -68,16 +68,77 @@
                 ],
             ];
 
+            // Build image lookup from local RoomType models by flexible name matching
+            $localTypeMap = [];
+            if (isset($roomTypes) && count($roomTypes) > 0) {
+                foreach ($roomTypes as $localType) {
+                    $normalized = strtolower(trim(preg_replace('/[^a-z0-9]+/i', ' ', $localType->name)));
+                    $localTypeMap[$normalized] = $localType;
+                    // Also key by first word
+                    $parts = explode(' ', $normalized);
+                    $firstWord = $parts[0] ?? '';
+                    if ($firstWord !== '') {
+                        $localTypeMap['first:' . $firstWord] = $localType;
+                    }
+                    // Key by normalized no-space
+                    $localTypeMap['ns:' . str_replace(' ', '', $normalized)] = $localType;
+                }
+            }
+
+            /**
+             * Match a PMS room type name to a local RoomType.
+             * Tries: exact normalized match → contains match → first-word match.
+             */
+            $matchLocalType = function ($pmsName) use ($localTypeMap) {
+                $search = strtolower(trim(preg_replace('/[^a-z0-9]+/i', ' ', $pmsName)));
+                $searchNs = str_replace(' ', '', $search);
+                $searchParts = explode(' ', $search);
+                $searchFirst = $searchParts[0] ?? '';
+
+                // 1. Exact normalized match
+                if (isset($localTypeMap[$search])) {
+                    return $localTypeMap[$search];
+                }
+                if (isset($localTypeMap['ns:' . $searchNs])) {
+                    return $localTypeMap['ns:' . $searchNs];
+                }
+
+                // 2. First-word match
+                if ($searchFirst !== '' && isset($localTypeMap['first:' . $searchFirst])) {
+                    return $localTypeMap['first:' . $searchFirst];
+                }
+
+                // 3. Contains match — PMS name shares all words with a local name or vice versa
+                foreach ($localTypeMap as $key => $localType) {
+                    if (str_starts_with($key, 'first:') || str_starts_with($key, 'ns:')) {
+                        continue;
+                    }
+                    $localWords = explode(' ', $key);
+                    $common = array_intersect($localWords, $searchParts);
+                    if (count($common) >= min(count($localWords), count($searchParts))) {
+                        return $localType;
+                    }
+                }
+
+                return null;
+            };
+
             $displayRooms = [];
             if ($usePms) {
                 foreach ($pmsRoomTypes as $key => $type) {
+                    $typeName = $type['name'];
+                    $matched = $matchLocalType($typeName);
+                    $matchedImage = $matched?->image_path
+                        ?? $type['image']
+                        ?? null;
+
                     $displayRooms[] = (object)[
-                        'name' => $type['name'],
+                        'name' => $typeName,
                         'base_price' => $type['min_price'],
-                        'image_path' => $type['image'] ?? 'room-types/executive/IMG_20260315_154656_154.jpg',
-                        'description' => $type['description'] ?? '',
-                        'facilities' => $type['facilities'] ?? [],
-                        'max_occupancy' => $type['max_occupancy'] ?? 2,
+                        'image_path' => $matchedImage ?? 'room-types/executive/IMG_20260315_154656_154.jpg',
+                        'description' => $type['description'] ?? ($matched?->description ?? ''),
+                        'facilities' => $type['facilities'] ?? ($matched?->facilities ?? []),
+                        'max_occupancy' => $type['max_occupancy'] ?? ($matched?->max_occupancy ?? 2),
                     ];
                 }
             } elseif (count($roomTypes) > 0) {
@@ -107,6 +168,8 @@
                     $priceNum = is_array($room) ? ($room['base_price'] ?? 0) : ($room->base_price ?? 0);
                     $availClass = $priceNum > 0 ? 'avail-available' : 'avail-unavailable';
                     $availText = $priceNum > 0 ? 'Available' : 'Sold Out';
+                    $isPopular = $priceNum >= 750000;
+                    $isBestValue = $priceNum >= 350000 && $priceNum <= 450000;
                 @endphp
                 <div class="room-card card-dark">
                     {{-- Image --}}
@@ -123,9 +186,16 @@
                             </div>
                         @endif
 
+                        {{-- Image Overlay Gradient --}}
+                        <div class="room-card-img-overlay"></div>
+
                         {{-- Badges --}}
-                        <span class="room-badge badge-category">{{ Illuminate\Support\Str::limit($name, 18) }}</span>
-                        <span class="room-badge badge-availability {{ $availClass }}">{{ $availText }}</span>
+                        @if($isPopular)
+                            <span class="room-badge badge-popular"><i class="fa-solid fa-star"></i> Popular Choice</span>
+                        @elseif($isBestValue)
+                            <span class="room-badge badge-value"><i class="fa-solid fa-tag"></i> Best Value</span>
+                        @endif
+                        <span class="room-badge badge-availability {{ $availClass }}"><span class="avail-dot"></span> {{ $availText }}</span>
                     </div>
 
                     {{-- Body --}}
@@ -191,6 +261,8 @@
 .room-card {
     display: flex;
     flex-direction: column;
+    will-change: transform;
+    transition: box-shadow 0.4s ease, border-color 0.4s ease;
 }
 
 .room-card-img-wrap {
@@ -225,31 +297,91 @@
     background: var(--bg-surface-2);
 }
 
+/* ---- Image Overlay ---- */
+.room-card-img-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to top,
+        rgba(9, 9, 15, 0.7) 0%,
+        rgba(9, 9, 15, 0.1) 40%,
+        transparent 70%
+    );
+    z-index: 1;
+    pointer-events: none;
+}
+
 /* ---- Badges ---- */
 .room-badge {
     position: absolute;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    padding: 5px 12px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 6px 14px;
     border-radius: var(--radius-full);
     text-transform: uppercase;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
 }
 
-.badge-category {
+.badge-popular {
     top: 12px;
     left: 12px;
-    background: var(--gold-primary);
+    background: linear-gradient(135deg, #D4AF37, #e8c84a);
     color: #09090f;
+    box-shadow: 0 2px 12px rgba(212, 175, 55, 0.4);
+    animation: badgePulse 2s ease-in-out infinite;
+}
+
+.badge-popular i {
+    font-size: 10px;
+}
+
+.badge-value {
+    top: 12px;
+    left: 12px;
+    background: rgba(52, 211, 153, 0.9);
+    color: #09090f;
+    backdrop-filter: blur(8px);
+}
+
+.badge-value i {
+    font-size: 10px;
+}
+
+@keyframes badgePulse {
+    0%, 100% { box-shadow: 0 2px 12px rgba(212, 175, 55, 0.4); }
+    50% { box-shadow: 0 2px 20px rgba(212, 175, 55, 0.7); }
 }
 
 .badge-availability {
     top: 12px;
     right: 12px;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.avail-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #4ade80;
+    animation: availDotPulse 1.5s ease-in-out infinite;
+}
+
+.avail-unavailable .avail-dot {
+    background: #f87171;
+    animation: none;
+}
+
+@keyframes availDotPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
 }
 
 .avail-available {
@@ -272,7 +404,7 @@
 .room-name {
     font-family: var(--font-display);
     font-size: 22px;
-    font-weight: 400;
+    font-weight: 500;
     color: var(--text-primary);
     margin: 0;
     line-height: 1.3;
@@ -344,24 +476,46 @@
 }
 
 /* ---- Responsive ---- */
-@media (max-width: 1024px) {
+@media (max-width: 1100px) {
     .rooms-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
     }
 }
 
 @media (max-width: 640px) {
+    .rooms-section {
+        overflow: hidden;
+    }
+
+    .rooms-header {
+        margin-bottom: var(--space-2xl);
+    }
+
+    .rooms-header .section-title {
+        font-size: clamp(26px, 7vw, 32px);
+    }
+
     .rooms-grid {
         display: flex;
         gap: 16px;
         overflow-x: auto;
         scroll-snap-type: x mandatory;
-        padding-bottom: 12px;
+        padding: 0 0 16px 0;
         -webkit-overflow-scrolling: touch;
+        margin: 0 calc(-1 * var(--space-md));
+        padding-left: var(--space-md);
+        padding-right: calc(var(--space-md) - 16px);
+        scrollbar-width: thin;
+        scrollbar-color: var(--border-hover) transparent;
     }
 
     .rooms-grid::-webkit-scrollbar {
         height: 4px;
+    }
+
+    .rooms-grid::-webkit-scrollbar-track {
+        background: transparent;
     }
 
     .rooms-grid::-webkit-scrollbar-thumb {
@@ -369,10 +523,112 @@
         border-radius: 4px;
     }
 
+    /* Scroll fade hint */
+    .rooms-grid::after {
+        content: '';
+        display: block;
+        min-width: 8px;
+        height: 1px;
+        flex-shrink: 0;
+    }
+
     .room-card {
-        min-width: 280px;
+        min-width: 300px;
+        max-width: 340px;
         scroll-snap-align: start;
         flex-shrink: 0;
+    }
+
+    .room-card:hover {
+        transform: none;
+    }
+
+    .room-card:active {
+        transform: scale(0.98);
+    }
+
+    .room-card-body {
+        padding: 16px;
+        gap: 10px;
+    }
+
+    .room-name {
+        font-size: 18px;
+    }
+
+    .room-desc {
+        font-size: 13px;
+        -webkit-line-clamp: 2;
+    }
+
+    .room-amenities {
+        gap: 5px;
+    }
+
+    .amenity-pill {
+        font-size: 10px;
+        padding: 3px 8px;
+    }
+
+    .room-price {
+        font-size: 18px;
+    }
+
+    .room-price-label {
+        font-size: 12px;
+    }
+
+    .room-actions {
+        gap: 8px;
+        padding-top: 4px;
+    }
+
+    .room-actions .btn-ghost.small,
+    .room-actions .btn-gold.small {
+        padding: 8px 16px;
+        font-size: 11px;
+        min-height: 36px;
+    }
+
+    .badge-popular,
+    .badge-value {
+        top: 10px;
+        left: 10px;
+        font-size: 9px;
+        padding: 4px 10px;
+    }
+
+    .badge-availability {
+        top: 10px;
+        right: 10px;
+        font-size: 9px;
+        padding: 4px 10px;
+    }
+
+    .room-card-img-wrap {
+        aspect-ratio: 16 / 10;
+    }
+}
+
+@media (max-width: 380px) {
+    .room-card {
+        min-width: 260px;
+    }
+
+    .room-card-body {
+        padding: 14px;
+        gap: 8px;
+    }
+
+    .room-name {
+        font-size: 16px;
+    }
+
+    .room-actions .btn-ghost.small,
+    .room-actions .btn-gold.small {
+        padding: 6px 12px;
+        font-size: 10px;
+        min-height: 32px;
     }
 }
 

@@ -49,6 +49,32 @@ html {
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* Ken Burns slow zoom */
+@keyframes kenBurns {
+    0%   { transform: scale(1); }
+    100% { transform: scale(1.08); }
+}
+
+@keyframes kenBurnsOut {
+    0%   { transform: scale(1.08); }
+    100% { transform: scale(1); }
+}
+
+/* Gradient text */
+.gradient-gold {
+    background: linear-gradient(135deg, #D4AF37 0%, #f0d080 40%, #D4AF37 70%, #e8c84a 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmerGold 4s ease-in-out infinite;
+}
+
+@keyframes shimmerGold {
+    0%, 100% { background-position: 0% center; }
+    50% { background-position: 100% center; }
+}
+
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -96,31 +122,6 @@ html {
 .reveal-stagger > .reveal-child:nth-child(8) { transition-delay: 700ms; }
 .reveal-stagger > .reveal-child:nth-child(9) { transition-delay: 800ms; }
 
-/* Hero text animation */
-.hero-title {
-    animation: fadeInUp 1s ease both;
-}
-.hero-subtitle {
-    animation: fadeInUp 1s ease 0.2s both;
-}
-.hero-booking {
-    animation: fadeInUp 1s ease 0.4s both;
-}
-
-/* Hero overlay pattern */
-.hero-overlay {
-    background:
-        radial-gradient(ellipse at 20% 50%, rgba(212, 175, 55, 0.08) 0%, transparent 60%),
-        radial-gradient(ellipse at 80% 50%, rgba(212, 175, 55, 0.05) 0%, transparent 60%),
-        linear-gradient(to bottom, rgba(15, 27, 48, 0.3) 0%, rgba(15, 27, 48, 0.6) 100%);
-}
-
-/* Hero pattern dots */
-.hero-pattern {
-    background-image: radial-gradient(rgba(212, 175, 55, 0.1) 1px, transparent 1px);
-    background-size: 30px 30px;
-}
-
 /* Date input styling for hero panel */
 input[type="date"] {
     appearance: none;
@@ -155,63 +156,102 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 }
 
 /* =====================================
-   EXPLORE OUR SPACES
+   EXPLORE OUR SPACES — BENTO GRID
    ===================================== */
 
-/* --- Masonry Grid (CSS Columns) --- */
+/* --- Bento Grid (CSS Grid) --- */
 .spaces-grid {
-    columns: 3;
-    column-gap: 16px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-md);
     perspective: 1400px;
 }
 @media (max-width: 1024px) {
-    .spaces-grid { columns: 2; column-gap: 14px; }
+    .spaces-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
 }
 @media (max-width: 640px) {
-    .spaces-grid { columns: 1; column-gap: 0; }
+    .spaces-grid { grid-template-columns: 1fr; gap: 12px; }
+}
+
+/* Bento size variants */
+.space-card.space-featured {
+    grid-column: span 2;
+    grid-row: span 2;
+}
+.space-card.space-wide {
+    grid-column: span 2;
+}
+.space-card.space-full {
+    grid-column: 1 / -1;
 }
 
 /* --- Space Card --- */
 .space-card {
     position: relative;
-    border-radius: 20px;
+    border-radius: var(--radius-xl);
     overflow: hidden;
     cursor: pointer;
-    break-inside: avoid;
-    margin-bottom: 16px;
-    display: inline-block;
-    width: 100%;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
-@media (max-width: 640px) {
-    .space-card { margin-bottom: 12px; }
+.space-card:active .space-card-inner {
+    transform: scale(0.98);
 }
 
-/* --- 3D Flip Entrance Animation --- */
-.spaces-grid.stagger > * {
+/* --- Staggered Entrance Animation --- */
+.spaces-grid.stagger > .space-card {
     opacity: 0;
-    transform: translateY(50px) rotateX(18deg);
+    transform: translateY(40px) rotateX(12deg);
     transform-origin: top center;
     transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
                 transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
     will-change: transform, opacity;
 }
 
-.spaces-grid.stagger.in > * {
+.spaces-grid.stagger.in > .space-card {
     opacity: 1;
     transform: translateY(0) rotateX(0deg);
+}
+
+/* Reduced motion — simple fade only */
+@media (prefers-reduced-motion: reduce) {
+    .spaces-grid.stagger > .space-card {
+        transform: translateY(20px);
+        transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .spaces-grid.stagger.in > .space-card {
+        transform: translateY(0);
+    }
+    .space-card:hover .space-card-img {
+        transform: none;
+    }
+    .space-card-inner::after {
+        display: none;
+    }
 }
 
 /* Card inner */
 .space-card-inner {
     position: relative;
     width: 100%;
+    height: 100%;
+    min-height: 240px;
     overflow: hidden;
-    border-radius: 20px;
+    border-radius: var(--radius-xl);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.space-featured .space-card-inner { min-height: 400px; }
+.space-wide .space-card-inner { min-height: 300px; }
+@media (max-width: 640px) {
+    .space-card-inner { min-height: 200px; }
+    .space-featured .space-card-inner { min-height: 280px; }
+    .space-wide .space-card-inner { min-height: 240px; }
 }
 
 .space-card-img {
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: cover;
     display: block;
     transition: opacity 0.8s ease,
                 transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
@@ -219,9 +259,38 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 .space-card:hover .space-card-img {
     transform: scale(1.08);
 }
-/* Back image layer for crossfade - inherits same hover scale */
+/* Back image layer for crossfade */
 .sc-back-img {
     pointer-events: none;
+}
+
+/* --- Skeleton Shimmer --- */
+.space-card-skeleton {
+    position: absolute;
+    inset: 0;
+    background: var(--bg-surface);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    z-index: 1;
+}
+.space-card-skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.04) 50%,
+        transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.8s ease-in-out infinite;
+}
+.space-card-img.loaded + .space-card-skeleton,
+.space-card-img.lazyloaded + .space-card-skeleton {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
 }
 
 /* Cinematic overlay */
@@ -237,7 +306,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     );
     display: flex;
     align-items: flex-end;
-    padding: 28px 24px;
+    padding: var(--space-lg) var(--space-lg);
     transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .space-card:hover .space-card-overlay {
@@ -265,7 +334,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     background: rgba(212, 175, 55, 0.12);
     padding: 3px 10px;
     border-radius: 20px;
-    margin-bottom: 8px;
+    margin-bottom: var(--space-sm);
 }
 
 .space-card-title {
@@ -276,7 +345,9 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     margin: 0 0 10px;
     line-height: 1.2;
 }
+.space-featured .space-card-title { font-size: 30px; }
 .space-wide .space-card-title { font-size: 26px; }
+.space-featured .space-card-btn,
 .space-wide .space-card-btn { padding: 10px 22px; font-size: 14px; }
 
 .space-card-btn {
@@ -288,6 +359,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     color: #fff;
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     padding: 8px 18px;
     border-radius: 24px;
     border: 1px solid rgba(255, 255, 255, 0.15);
@@ -306,6 +378,83 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 }
 .space-card:hover .space-card-btn i {
     transform: translateX(4px);
+}
+
+/* Gold border glow on hover — simplified with box-shadow (better perf) */
+.space-card-inner::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-xl);
+    border: 2px solid transparent;
+    background: linear-gradient(135deg, #D4AF37, rgba(212, 175, 55, 0.1), transparent 60%) border-box;
+    -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    z-index: 3;
+    pointer-events: none;
+}
+.space-card:hover .space-card-inner::after {
+    opacity: 1;
+}
+
+/* View Full Gallery CTA */
+.gallery-cta {
+    text-align: center;
+    margin-top: var(--space-xl);
+}
+
+/* Back to Top Button */
+.back-to-top {
+    position: fixed;
+    bottom: 90px;
+    right: 24px;
+    z-index: 998;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #D4AF37, #c4a030);
+    color: #1B2A4A;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.back-to-top.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+.back-to-top:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 30px rgba(212, 175, 55, 0.5);
+}
+.back-to-top:active {
+    transform: translateY(0);
+}
+
+/* Reading Progress Bar */
+.progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 3px;
+    z-index: 9999;
+    background: linear-gradient(90deg, #D4AF37, #f0d080, #D4AF37);
+    background-size: 200% 100%;
+    animation: shimmerGold 2s ease-in-out infinite;
+    transition: width 0.1s linear;
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
 }
 
 /* Gold border glow on hover */

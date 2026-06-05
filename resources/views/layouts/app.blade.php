@@ -16,8 +16,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
 
+    {{-- Preload hero image for performance --}}
+    <link rel="preload" as="image" href="{{ asset('storage/depanbanner/1.jpeg') }}" fetchpriority="high">
+
     {{-- Font Awesome 6 --}}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous">
 
     {{-- Styles --}}
     @vite([
@@ -31,11 +34,16 @@
 </head>
 <body>
 
+    {{-- Skip to content (Accessibility) --}}
+    <a href="#main-content" class="skip-to-content">
+        Skip to main content
+    </a>
+
     {{-- Navbar (included from hero partial) --}}
     @include('partials.hero')
 
     {{-- Main Content --}}
-    <main>
+    <main id="main-content" tabindex="-1">
         @yield('content')
     </main>
 
@@ -44,6 +52,14 @@
 
     {{-- Booking Modal --}}
     @include('partials.booking-modal')
+
+    {{-- Reading Progress Bar --}}
+    <div id="reading-progress" class="progress-bar" role="progressbar" aria-label="Reading progress"></div>
+
+    {{-- Back to Top Button --}}
+    <button id="back-to-top" class="back-to-top" aria-label="Back to top">
+        <i class="fa-solid fa-arrow-up"></i>
+    </button>
 
     {{-- WhatsApp Floating Button --}}
     @if($settings['whatsapp'] ?? false)

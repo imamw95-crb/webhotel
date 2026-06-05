@@ -7,6 +7,7 @@ use App\Services\PmsApiService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
@@ -62,7 +63,7 @@ class SyncPmsReservation implements ShouldQueue
 
                 throw new \RuntimeException('PMS API reservation failed: '.$errorMsg);
             }
-        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+        } catch (ConnectionException $e) {
             // Network error: retry later
             Log::warning('PMS API connection timeout in job', [
                 'booking_code' => $this->booking->booking_code,

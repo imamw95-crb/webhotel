@@ -18,8 +18,18 @@
 
                     {{-- Floating Stat Cards --}}
                     @php
+                        $totalRooms = 0;
+                        if (isset($pmsRoomTypes) && count($pmsRoomTypes) > 0) {
+                            foreach ($pmsRoomTypes as $type) {
+                                $totalRooms += count($type['rooms'] ?? []);
+                            }
+                        } elseif (isset($roomTypes) && $roomTypes->count() > 0) {
+                            $totalRooms = $roomTypes->sum('total_rooms') ?: 31;
+                        } else {
+                            $totalRooms = 31;
+                        }
                         $stats = $sections['about']['content']['stats'] ?? [
-                            ['label' => 'Rooms', 'value' => 29],
+                            ['label' => 'Rooms', 'value' => $totalRooms],
                             ['label' => 'Room Types', 'value' => 6],
                             ['label' => 'Facilities', 'value' => 9],
                             ['label' => 'Staff', 'value' => 24],

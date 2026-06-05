@@ -21,8 +21,8 @@
                 <p class="text-sm text-gray-500">Facilities</p>
                 <p class="text-3xl font-bold text-navy-800">{{ $stats['facilities'] }}</p>
             </div>
-            <div class="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
-                <i class="fa-solid fa-star text-blue-500 text-xl"></i>
+            <div class="w-12 h-12 bg-gold-400/10 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-star text-gold-400 text-xl"></i>
             </div>
         </div>
     </div>
@@ -32,8 +32,8 @@
                 <p class="text-sm text-gray-500">Gallery Images</p>
                 <p class="text-3xl font-bold text-navy-800">{{ $stats['gallery_images'] }}</p>
             </div>
-            <div class="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center">
-                <i class="fa-solid fa-images text-purple-500 text-xl"></i>
+            <div class="w-12 h-12 bg-gold-400/10 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-images text-gold-400 text-xl"></i>
             </div>
         </div>
     </div>
@@ -43,8 +43,8 @@
                 <p class="text-sm text-gray-500">Messages</p>
                 <p class="text-3xl font-bold text-navy-800">{{ $stats['total_contacts'] }}</p>
             </div>
-            <div class="w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center">
-                <i class="fa-solid fa-envelope text-red-500 text-xl"></i>
+            <div class="w-12 h-12 bg-gold-400/10 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-envelope text-gold-400 text-xl"></i>
             </div>
         </div>
     </div>

@@ -40,6 +40,23 @@ document.addEventListener('DOMContentLoaded', () => {
         revealObserver.observe(el);
     });
 
+    // --- Skeleton loader removal ---
+    initSkeletonRemoval();
+
+    // --- Stagger animation trigger for spaces grid ---
+    const staggerGrid = document.getElementById('spaces-grid');
+    if (staggerGrid) {
+        const staggerObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('in');
+                    staggerObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        staggerObserver.observe(staggerGrid);
+    }
+
     // --- Space Carousel (Explore Our Spaces) ---
     initSpaceCarousel();
 
@@ -49,7 +66,110 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Animated Counters ---
     initCounters();
 
+    // --- Back to Top & Progress Bar ---
+    initScrollTools();
+
+    // --- 3D Tilt Effect for Room Cards ---
+    initTiltEffect();
+
 });
+
+// ============================================
+// Back to Top & Reading Progress
+// ============================================
+function initScrollTools() {
+    const backToTop = document.getElementById('back-to-top');
+    const progressBar = document.getElementById('reading-progress');
+    if (!backToTop && !progressBar) return;
+
+    let ticking = false;
+
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            requestAnimationFrame(() => {
+                const scrollY = window.scrollY;
+                const winHeight = document.documentElement.scrollHeight - window.innerHeight;
+                const progress = winHeight > 0 ? (scrollY / winHeight) * 100 : 0;
+
+                // Progress bar
+                if (progressBar) {
+                    progressBar.style.width = progress + '%';
+                    progressBar.setAttribute('aria-valuenow', Math.round(progress));
+                }
+
+                // Back to top visibility
+                if (backToTop) {
+                    if (scrollY > 400) {
+                        backToTop.classList.add('visible');
+                    } else {
+                        backToTop.classList.remove('visible');
+                    }
+                }
+
+                ticking = false;
+            });
+            ticking = true;
+        }
+    }, { passive: true });
+
+    // Back to top click
+    if (backToTop) {
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+}
+
+// ============================================
+// 3D Tilt Effect for Room Cards
+// ============================================
+function initTiltEffect() {
+    if (window.matchMedia('(pointer: coarse)').matches) return; // skip on touch devices
+
+    const cards = document.querySelectorAll('.room-card');
+    if (!cards.length) return;
+
+    cards.forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+
+            const rotateX = ((y - centerY) / centerY) * -6;
+            const rotateY = ((x - centerX) / centerX) * 6;
+
+            card.style.transform =
+                `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-8px)`;
+        });
+
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = '';
+        });
+    });
+}
+
+// ============================================
+// Skeleton loader — remove skeleton on image load
+// ============================================
+function initSkeletonRemoval() {
+    document.querySelectorAll('.space-card-img').forEach(img => {
+        if (img.complete) {
+            const skeleton = img.parentElement?.querySelector('.space-card-skeleton');
+            if (skeleton) skeleton.remove();
+        } else {
+            img.addEventListener('load', () => {
+                const skeleton = img.parentElement?.querySelector('.space-card-skeleton');
+                if (skeleton) skeleton.remove();
+            });
+            img.addEventListener('error', () => {
+                const skeleton = img.parentElement?.querySelector('.space-card-skeleton');
+                if (skeleton) skeleton.remove();
+            });
+        }
+    });
+}
 
 // ============================================
 // Space Carousel — click space card to open
@@ -72,13 +192,10 @@ function initSpaceCarousel() {
 
     let images = [];
     let idx = 0;
+    let previousFocus = null;
 
-    // Click on space card
-    section.addEventListener('click', (e) => {
-        const card = e.target.closest('.space-card');
-        if (!card) return;
-
-        // Try to get photos from data attribute (DB mode)
+    // Open card on click OR Enter/Space key
+    function openCard(card) {
         let photos = [];
         try {
             const raw = card.dataset.photos;
@@ -86,7 +203,6 @@ function initSpaceCarousel() {
         } catch (_) {}
 
         if (!photos.length) {
-            // Fallback: just open with the single card image
             const img = card.querySelector('.space-card-img');
             if (img && img.src) {
                 photos = [{ src: img.src, title: card.dataset.category || 'Photo' }];
@@ -94,34 +210,90 @@ function initSpaceCarousel() {
         }
 
         if (!photos.length) return;
-
         images = photos;
         idx = 0;
+        previousFocus = document.activeElement;
         openCarousel();
+    }
+
+    // Click on space card
+    section.addEventListener('click', (e) => {
+        const card = e.target.closest('.space-card');
+        if (!card) return;
+        // Ignore if clicking the CTA button or inside carousel
+        if (e.target.closest('#view-all-gallery')) return;
+        openCard(card);
     });
+
+    // Enter/Space on space card (keyboard a11y)
+    section.addEventListener('keydown', (e) => {
+        const card = e.target.closest('.space-card');
+        if (!card) return;
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openCard(card);
+        }
+    });
+
+    // View Full Gallery CTA — opens first card
+    const viewAllBtn = document.getElementById('view-all-gallery');
+    if (viewAllBtn) {
+        viewAllBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const firstCard = section.querySelector('.space-card');
+            if (firstCard) openCard(firstCard);
+        });
+    }
+
+    // --- Focus Trap for Carousel ---
+    function trapFocus(e) {
+        if (!carousel.classList.contains('open')) return;
+        const focusable = carousel.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.key === 'Tab') {
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+            }
+        }
+    }
 
     function openCarousel() {
         carousel.classList.add('open');
         document.body.style.overflow = 'hidden';
         renderImage();
         renderThumbs();
+        // Focus close button
+        requestAnimationFrame(() => closeBtn.focus());
     }
 
     function closeCarousel() {
         carousel.classList.remove('open');
         document.body.style.overflow = '';
+        // Restore focus
+        if (previousFocus) {
+            previousFocus.focus();
+            previousFocus = null;
+        }
     }
 
-    function navigateTo(newIdx) {
+    function navigateTo(newIdx, direction) {
         if (newIdx < 0) newIdx = images.length - 1;
         if (newIdx >= images.length) newIdx = 0;
         if (newIdx === idx) return;
         idx = newIdx;
-        renderImage();
+        renderImage(direction);
         renderThumbs();
     }
 
-    function renderImage() {
+    function renderImage(direction) {
         const data = images[idx];
         if (!data) return;
 
@@ -129,15 +301,21 @@ function initSpaceCarousel() {
         scImage.classList.remove('slide-next', 'slide-prev', 'loaded');
         scImage.src = '';
         scCaption.textContent = '';
+        scImage.alt = '';
 
         // Preload then show
         const img = new Image();
         img.onload = () => {
             scImage.src = data.src;
-            scImage.alt = data.title || '';
+            scImage.alt = data.title || 'Gallery photo';
             scCaption.textContent = data.title || '';
             scCounter.textContent = `${idx + 1} / ${images.length}`;
-            scImage.classList.add('slide-next', 'loaded');
+            scCounter.setAttribute('aria-label', `Photo ${idx + 1} of ${images.length}`);
+            if (direction === 'prev') {
+                scImage.classList.add('slide-prev', 'loaded');
+            } else {
+                scImage.classList.add('slide-next', 'loaded');
+            }
         };
         img.src = data.src;
     }
@@ -145,8 +323,11 @@ function initSpaceCarousel() {
     function renderThumbs() {
         scThumbs.innerHTML = '';
         images.forEach((imgData, i) => {
-            const thumb = document.createElement('div');
+            const thumb = document.createElement('button');
             thumb.className = 'sc-thumb' + (i === idx ? ' active' : '');
+            thumb.setAttribute('role', 'tab');
+            thumb.setAttribute('aria-label', `Photo ${i + 1}: ${imgData.title || ''}`);
+            thumb.setAttribute('aria-selected', i === idx ? 'true' : 'false');
             thumb.innerHTML = `<img src="${imgData.src}" alt="${imgData.title || ''}" loading="lazy">`;
             thumb.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -154,7 +335,6 @@ function initSpaceCarousel() {
             });
             scThumbs.appendChild(thumb);
 
-            // Scroll active into view
             if (i === idx) {
                 requestAnimationFrame(() => {
                     thumb.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
@@ -165,28 +345,44 @@ function initSpaceCarousel() {
 
     // Event listeners
     closeBtn.addEventListener('click', closeCarousel);
-    prevBtn.addEventListener('click', () => navigateTo(idx - 1));
-    nextBtn.addEventListener('click', () => navigateTo(idx + 1));
+    prevBtn.addEventListener('click', () => navigateTo(idx - 1, 'prev'));
+    nextBtn.addEventListener('click', () => navigateTo(idx + 1, 'next'));
     backdrop.addEventListener('click', closeCarousel);
 
     // Keyboard
     document.addEventListener('keydown', function scKey(e) {
         if (!carousel.classList.contains('open')) return;
-        if (e.key === 'Escape') closeCarousel();
-        if (e.key === 'ArrowLeft') navigateTo(idx - 1);
-        if (e.key === 'ArrowRight') navigateTo(idx + 1);
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            closeCarousel();
+        }
+        if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            navigateTo(idx - 1, 'prev');
+        }
+        if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            navigateTo(idx + 1, 'next');
+        }
     });
 
-    // Touch swipe
+    // Focus trap
+    document.addEventListener('keydown', trapFocus);
+
+    // Touch swipe with direction feedback
     let touchStartX = 0;
+    let touchStartY = 0;
     carousel.addEventListener('touchstart', (e) => {
         touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
     }, { passive: true });
     carousel.addEventListener('touchend', (e) => {
-        const diff = e.changedTouches[0].screenX - touchStartX;
-        if (Math.abs(diff) > 50) {
-            if (diff > 0) navigateTo(idx - 1);
-            else navigateTo(idx + 1);
+        const diffX = e.changedTouches[0].screenX - touchStartX;
+        const diffY = e.changedTouches[0].screenY - touchStartY;
+        // Only horizontal swipes (ignore vertical scrolling)
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+            if (diffX > 0) navigateTo(idx - 1, 'prev');
+            else navigateTo(idx + 1, 'next');
         }
     }, { passive: true });
 }
