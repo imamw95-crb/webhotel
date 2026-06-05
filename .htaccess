@@ -1,0 +1,11 @@
+RewriteEngine On
+# Rewrite storage/ assets to public/storage/ 
+RewriteRule ^storage/(.*)$ public/storage/$1 [L]
+# Rewrite build/ (Vite) assets to public/build/
+RewriteRule ^build/(.*)$ public/build/$1 [L]
+# Rewrite js/ assets to public/js/
+RewriteRule ^js/(.*)$ public/js/$1 [L]
+# Rewrite all other requests to index.php (Laravel bootstrap)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [L]
