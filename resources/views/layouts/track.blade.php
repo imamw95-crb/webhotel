@@ -6,6 +6,10 @@
     <title>Track Booking - {{ $settings['meta_title'] ?? config('app.name', 'The Icon Hotel') }}</title>
     <meta name="description" content="Track your booking status at The Icon Hotel Kuningan">
 
+    {{-- Favicon --}}
+    <link rel="icon" type="image/png" href="{{ asset('storage/logo/icon.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('storage/logo/icon.png') }}">
+
     {{-- Google Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

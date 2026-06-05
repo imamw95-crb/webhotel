@@ -11,6 +11,10 @@
     <meta name="description" content="{{ $settings['meta_description'] ?? '' }}">
     <meta name="keywords" content="{{ $settings['meta_keywords'] ?? '' }}">
 
+    {{-- Favicon --}}
+    <link rel="icon" type="image/png" href="{{ asset('storage/logo/icon.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('storage/logo/icon.png') }}">
+
     {{-- Google Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

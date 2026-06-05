@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin') — {{ config('app.name', 'Hotel') }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('storage/logo/icon.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('storage/logo/icon.png') }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
