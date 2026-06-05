@@ -50,29 +50,34 @@ class PmsApiService
 
     /**
      * Get available rooms for a date range.
+     * Results are cached for 2 minutes per date combination.
      */
     public function getAvailableRooms(string $checkIn, string $checkOut): array
     {
-        try {
-            $response = Http::withHeaders($this->headers())
-                ->timeout($this->timeout)
-                ->get("{$this->baseUrl}/api/rooms/available", [
-                    'check_in' => $checkIn,
-                    'check_out' => $checkOut,
-                ]);
+        $cacheKey = 'pms_available_rooms|'.$checkIn.'|'.$checkOut;
 
-            if ($response->successful()) {
-                return $response->json('data') ?? $response->json() ?? [];
+        return Cache::remember($cacheKey, 120, function () use ($checkIn, $checkOut) {
+            try {
+                $response = Http::withHeaders($this->headers())
+                    ->timeout($this->timeout)
+                    ->get("{$this->baseUrl}/api/rooms/available", [
+                        'check_in' => $checkIn,
+                        'check_out' => $checkOut,
+                    ]);
+
+                if ($response->successful()) {
+                    return $response->json('data') ?? $response->json() ?? [];
+                }
+
+                Log::warning('PMS API getAvailableRooms failed', ['status' => $response->status()]);
+
+                return [];
+            } catch (\Exception $e) {
+                Log::error('PMS API getAvailableRooms error: '.$e->getMessage());
+
+                return [];
             }
-
-            Log::warning('PMS API getAvailableRooms failed', ['status' => $response->status()]);
-
-            return [];
-        } catch (\Exception $e) {
-            Log::error('PMS API getAvailableRooms error: '.$e->getMessage());
-
-            return [];
-        }
+        });
     }
 
     /**

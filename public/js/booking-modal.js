@@ -307,6 +307,41 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Show error state when availability API fails
+    function bmShowError(message, checkIn, checkOut) {
+        var container = document.getElementById('av-results');
+        var iconEl = document.getElementById('av-results-icon');
+        var titleEl = document.getElementById('av-results-title');
+        var statusEl = document.getElementById('av-results-status');
+        var typesContainer = document.getElementById('av-results-types');
+        if (!container || !titleEl || !typesContainer) return;
+
+        container.style.display = 'block';
+        container.style.animation = 'none';
+        void container.offsetWidth;
+        container.style.animation = '';
+
+        if (iconEl) {
+            iconEl.className = 'av-icon error';
+            iconEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+        }
+        titleEl.innerHTML = '<strong>Service Unavailable</strong>' +
+            '<span style="color:var(--text-muted);font-size:13px;display:block;margin-top:2px;">' +
+            'Could not check availability right now. Please try again or contact us directly.' +
+            '</span>';
+        if (statusEl) statusEl.textContent = 'Error';
+
+        typesContainer.innerHTML =
+            '<div class="av-empty">' +
+                '<div class="av-empty-icon" style="color:var(--accent-danger,#e74c3c);"><i class="fa-solid fa-wifi-slash"></i></div>' +
+                '<div class="av-empty-title">Connection Error</div>' +
+                '<div class="av-empty-desc">We\'re having trouble connecting to our booking system. Please try again in a moment, or give us a call to make a reservation.</div>' +
+                '<button type="button" class="btn-gold small" onclick="document.getElementById(\'av-search-btn\') ? document.getElementById(\'av-search-btn\').click() : null">' +
+                    '<i class="fa-solid fa-rotate"></i> Try Again' +
+                '</button>' +
+            '</div>';
+    }
+
     // Availability search button - call API then show results
     var searchBtn = document.getElementById('av-search-btn');
     if (searchBtn) {
@@ -345,7 +380,12 @@ document.addEventListener('DOMContentLoaded', function() {
             var url = (window.bmApiUrl || '/api/check-availability') + '?check_in=' + encodeURIComponent(ci) + '&check_out=' + encodeURIComponent(co);
 
             fetch(url)
-                .then(function(response) { return response.json(); })
+                .then(function(response) {
+                    if (!response.ok) {
+                        throw new Error('Server responded with ' + response.status);
+                    }
+                    return response.json();
+                })
                 .then(function(result) {
                     searchBtn.innerHTML = searchBtnOrig;
                     searchBtn.disabled = false;
@@ -360,7 +400,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     searchBtn.innerHTML = searchBtnOrig;
                     searchBtn.disabled = false;
                     console.error('Availability check failed:', err);
-                    bmShowResults([], ci, co, g);
+                    bmShowError(err.message, ci, co);
                 });
         });
     }
