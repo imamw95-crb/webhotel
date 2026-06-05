@@ -87,6 +87,20 @@
 </div>
 
 <div class="grid lg:grid-cols-2 gap-6">
+    {{-- Sync Prices Card --}}
+    <div class="bg-white rounded-xl shadow-sm border p-6 flex items-center justify-between">
+        <div>
+            <h3 class="text-lg font-semibold text-gray-800">Sync Harga dari PMS</h3>
+            <p class="text-sm text-gray-500 mt-1">Sinkronisasi harga tipe kamar dengan data terbaru dari PMS.</p>
+        </div>
+        <form method="POST" action="{{ route('admin.sync-prices') }}" onsubmit="return confirm('Sinkronisasi harga dari PMS?')">
+            @csrf
+            <button type="submit" class="px-4 py-2 bg-gold-400 text-white rounded-lg hover:bg-gold-500 transition text-sm font-medium">
+                <i class="fa-solid fa-sync mr-1"></i> Sync Now
+            </button>
+        </form>
+    </div>
+
     {{-- Recent Bookings --}}
     <div class="bg-white rounded-xl shadow-sm border">
         <div class="p-6 border-b flex justify-between items-center">

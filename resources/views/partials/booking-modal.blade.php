@@ -3,9 +3,9 @@
    Pure HTML/CSS/JS (no Alpine dependency)
    ============================================================ --}}
 
-<div id="booking-modal" class="booking-modal-overlay" style="display:none;" role="dialog" aria-modal="true">
+<div id="booking-modal" class="booking-modal-overlay" role="dialog" aria-modal="true">
     {{-- Backdrop --}}
-    <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" id="bm-backdrop"></div>
+    <div class="fixed inset-0 bg-black/70 backdrop-blur-sm bm-backdrop" id="bm-backdrop"></div>
 
     {{-- Modal --}}
     <div class="relative rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto z-10 bm-modal">
@@ -32,7 +32,7 @@
             {{-- Hidden room_id --}}
             <input type="hidden" name="room_id" id="bm-room-id">
 
-            {{-- Date & Guests Row --}}
+            {{-- Check-in, Check-out & Guests Row --}}
             <div class="grid sm:grid-cols-3 gap-4">
                 <div>
                     <label class="bm-label">Check-in <span class="text-red-400">*</span></label>
@@ -139,10 +139,22 @@
 
 {{-- Inline styles --}}
 <style>
+/* ---- Overlay (Backdrop + Centering) ---- */
 .booking-modal-overlay {
     position: fixed; inset: 0; z-index: 9999;
     display: flex; align-items: center; justify-content: center;
     padding: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+.booking-modal-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+.booking-modal-overlay.closing {
+    opacity: 0;
+    pointer-events: none;
 }
 .booking-modal-overlay > .fixed {
     position: fixed; inset: 0; z-index: 1;
@@ -151,10 +163,27 @@
     position: relative; z-index: 2;
 }
 
+/* ---- Backdrop fade ---- */
+.bm-backdrop {
+    transition: opacity 0.3s ease;
+}
+
 /* ---- Modal Container ---- */
 .bm-modal {
     background: var(--bg-surface);
     border: 1px solid rgba(201, 168, 76, 0.15);
+    transform: translateY(24px) scale(0.95);
+    opacity: 0;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+}
+.booking-modal-overlay.open .bm-modal {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+.booking-modal-overlay.closing .bm-modal {
+    transform: translateY(24px) scale(0.95);
+    opacity: 0;
+    transition: transform 0.25s ease-in, opacity 0.2s ease;
 }
 
 /* ---- Header ---- */
@@ -306,283 +335,5 @@
 }
 </style>
 
-<script>
-// Booking Modal State
-var bm = {
-    today: function() {
-        return new Date().toISOString().split('T')[0];
-    },
-    tomorrow: function() {
-        var d = new Date(); d.setDate(d.getDate() + 1);
-        return d.toISOString().split('T')[0];
-    },
-    minCheckOut: function() {
-        var ci = document.getElementById('bm-checkin').value;
-        if (!ci) return bm.tomorrow();
-        var d = new Date(ci); d.setDate(d.getDate() + 1);
-        return d.toISOString().split('T')[0];
-    },
-    formatDate: function(dateStr) {
-        if (!dateStr) return '';
-        var parts = dateStr.split('-');
-        return parts[2] + '/' + parts[1] + '/' + parts[0];
-    },
-    nights: function() {
-        var ci = document.getElementById('bm-checkin').value;
-        var co = document.getElementById('bm-checkout').value;
-        if (!ci || !co) return 0;
-        return Math.max((new Date(co) - new Date(ci)) / 86400000, 0);
-    }
-};
-
-// Set min attributes on check-in and pre-fill defaults
-function bmInitDates() {
-    var ci = document.getElementById('bm-checkin');
-    var co = document.getElementById('bm-checkout');
-    if (ci) {
-        ci.setAttribute('min', bm.today());
-        if (!ci.value) ci.value = bm.today();
-    }
-    if (co) {
-        co.setAttribute('min', bm.tomorrow());
-        if (!co.value) co.value = bm.tomorrow();
-    }
-}
-
-// Update check-out min when check-in changes
-function bmUpdateCheckoutMin() {
-    var ci = document.getElementById('bm-checkin');
-    var co = document.getElementById('bm-checkout');
-    if (ci && co) {
-        co.setAttribute('min', bm.minCheckOut());
-        if (co.value && co.value <= ci.value) co.value = '';
-    }
-}
-
-// Update booking summary
-function bmUpdateSummary() {
-    var ci = document.getElementById('bm-checkin').value;
-    var co = document.getElementById('bm-checkout').value;
-    var summary = document.getElementById('bm-summary');
-    if (ci && co) {
-        document.getElementById('bm-sum-checkin').textContent = bm.formatDate(ci);
-        document.getElementById('bm-sum-checkout').textContent = bm.formatDate(co);
-        var n = bm.nights();
-        document.getElementById('bm-sum-duration').textContent = n + (n > 1 ? ' nights' : ' night');
-        summary.style.display = 'block';
-    } else {
-        summary.style.display = 'none';
-    }
-}
-
-// Open modal
-window.openBookingModal = function(options) {
-    options = options || {};
-    var modal = document.getElementById('booking-modal');
-    if (!modal) return;
-
-    // Set values
-    if (options.checkIn) document.getElementById('bm-checkin').value = options.checkIn;
-    if (options.checkOut) document.getElementById('bm-checkout').value = options.checkOut;
-    if (options.guests) document.getElementById('bm-guests').value = options.guests;
-    if (options.roomType) document.getElementById('bm-room-type').value = options.roomType;
-    if (options.roomId) document.getElementById('bm-room-id').value = options.roomId;
-
-    // Reset name/email/phone/notes/captcha
-    document.getElementById('bm-name').value = '';
-    document.getElementById('bm-email').value = '';
-    document.getElementById('bm-phone').value = '';
-    document.getElementById('bm-notes').value = '';
-    var cap = document.getElementById('bm-captcha');
-    if (cap) cap.value = '';
-
-    // Init dates and show
-    bmInitDates();
-    bmUpdateCheckoutMin();
-    bmUpdateSummary();
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-};
-
-// Close modal
-function bmClose() {
-    var modal = document.getElementById('booking-modal');
-    if (modal) modal.style.display = 'none';
-    document.body.style.overflow = '';
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Close buttons
-    document.getElementById('bm-close').addEventListener('click', bmClose);
-    document.getElementById('bm-backdrop').addEventListener('click', bmClose);
-
-    // ESC key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') bmClose();
-    });
-
-    // Room card "Book Now" buttons
-    document.querySelectorAll('.book-now-btn').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            window.openBookingModal({
-                checkIn: (document.getElementById('av-checkin') || {}).value || '',
-                checkOut: (document.getElementById('av-checkout') || {}).value || '',
-                guests: (document.getElementById('av-guests') || {}).value || 2,
-                roomType: this.dataset.roomType || '',
-                roomId: this.dataset.roomId || '',
-            });
-        });
-    });
-
-    // Format number to IDR
-    function bmFormatPrice(num) {
-        return 'Rp ' + Number(num).toLocaleString('id-ID');
-    }
-
-    // Calculate nights from dates
-    function bmCalcNights(ci, co) {
-        if (!ci || !co) return 0;
-        return Math.max((new Date(co) - new Date(ci)) / 86400000, 0);
-    }
-
-    // Update availability results display
-    function bmShowResults(rooms, checkIn, checkOut, guests) {
-        var container = document.getElementById('av-results');
-        var title = document.getElementById('av-results-title');
-        var typesContainer = document.getElementById('av-results-types');
-        if (!container || !title || !typesContainer) return;
-
-        var total = rooms.length;
-        var nights = bmCalcNights(checkIn, checkOut);
-
-        // Group by room type
-        var typeMap = {};
-        rooms.forEach(function(r) {
-            var key = r.room_type_name || 'Unknown';
-            if (!typeMap[key]) {
-                typeMap[key] = { name: key, rooms: [], price: r.price_per_night || 0 };
-            }
-            typeMap[key].rooms.push(r);
-            // Take the lowest price for display
-            var p = parseFloat(r.price_per_night || 0);
-            if (p < typeMap[key].price || typeMap[key].price === 0) {
-                typeMap[key].price = p;
-            }
-        });
-
-        var typeKeys = Object.keys(typeMap);
-
-        if (total === 0) {
-            title.innerHTML = '<span style="color:#f87171;">\u2716</span> No rooms available for ' + bm.formatDate(checkIn) + ' - ' + bm.formatDate(checkOut);
-            typesContainer.innerHTML = '<p style="color:var(--text-muted);font-size:14px;">Please try different dates or contact us directly.</p>';
-        } else {
-            title.innerHTML = '<span style="color:#4ade80;">\u2714</span> ' + total + ' room' + (total > 1 ? 's' : '') + ' available for ' + bm.formatDate(checkIn) + ' - ' + bm.formatDate(checkOut) + ' (' + nights + ' night' + (nights > 1 ? 's' : '') + ')';
-            typesContainer.innerHTML = '';
-            typeKeys.forEach(function(key) {
-                var t = typeMap[key];
-                var div = document.createElement('div');
-                div.className = 'av-result-type';
-                div.innerHTML =
-                    '<div class="av-result-type-info">' +
-                        '<div class="av-result-type-name">' + t.name + '</div>' +
-                        '<div class="av-result-type-price">' + bmFormatPrice(t.price) + ' / night</div>' +
-                        '<div class="av-result-type-count">' + t.rooms.length + ' room' + (t.rooms.length > 1 ? 's' : '') + ' available</div>' +
-                    '</div>' +
-                    '<button type="button" class="btn-gold small book-av-btn" data-room-type="' + t.name + '" data-room-id="">Book Now</button>';
-                typesContainer.appendChild(div);
-            });
-
-            // Attach event listeners to the new Book Now buttons
-            typesContainer.querySelectorAll('.book-av-btn').forEach(function(btn) {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    window.openBookingModal({
-                        checkIn: checkIn,
-                        checkOut: checkOut,
-                        guests: guests,
-                        roomType: this.dataset.roomType || '',
-                        roomId: this.dataset.roomId || '',
-                    });
-                });
-            });
-        }
-
-        container.style.display = 'block';
-
-        // Scroll to availability results
-        var target = document.getElementById('av-results-section');
-        if (!target) target = document.getElementById('rooms');
-        if (target) {
-            var nav = document.querySelector('nav');
-            var h = nav ? nav.offsetHeight : 0;
-            window.scrollTo({
-                top: target.getBoundingClientRect().top + window.scrollY - h,
-                behavior: 'smooth'
-            });
-        }
-    }
-
-    // Availability search button - call API then show results
-    var searchBtn = document.getElementById('av-search-btn');
-    if (searchBtn) {
-        searchBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            var ci = (document.getElementById('av-checkin') || {}).value || '';
-            var co = (document.getElementById('av-checkout') || {}).value || '';
-            var g = (document.getElementById('av-guests') || {}).value || 2;
-
-            if (!ci || !co) {
-                alert('Please select both check-in and check-out dates.');
-                return;
-            }
-
-            // Show loading state
-            searchBtn.textContent = 'Checking...';
-            searchBtn.disabled = true;
-
-            // Show loading in results area
-            var container = document.getElementById('av-results');
-            var title = document.getElementById('av-results-title');
-            var typesContainer = document.getElementById('av-results-types');
-            if (container) container.style.display = 'block';
-            if (title) title.textContent = 'Checking availability...';
-            if (typesContainer) typesContainer.innerHTML = '<p style="color:var(--text-muted);font-size:14px;">Please wait...</p>';
-
-            // Scroll to availability results
-            var target = document.getElementById('av-results-section');
-            if (!target) target = document.getElementById('rooms');
-            if (target) {
-                var nav = document.querySelector('nav');
-                var h = nav ? nav.offsetHeight : 0;
-                window.scrollTo({
-                    top: target.getBoundingClientRect().top + window.scrollY - h,
-                    behavior: 'smooth'
-                });
-            }
-
-            // Call availability API (using key from .env via backend)
-            var url = '{{ route('api.check-availability') }}?check_in=' + encodeURIComponent(ci) + '&check_out=' + encodeURIComponent(co);
-
-            fetch(url)
-                .then(function(response) { return response.json(); })
-                .then(function(result) {
-                    searchBtn.textContent = 'Search';
-                    searchBtn.disabled = false;
-
-                    if (result.success && result.data) {
-                        bmShowResults(result.data, ci, co, g);
-                    } else {
-                        bmShowResults([], ci, co, g);
-                    }
-                })
-                .catch(function(err) {
-                    searchBtn.textContent = 'Search';
-                    searchBtn.disabled = false;
-                    console.error('Availability check failed:', err);
-                    bmShowResults([], ci, co, g);
-                });
-        });
-    }
-});
-</script>
+<script>window.bmApiUrl = '{{ route('api.check-availability') }}';</script>
+<script src="{{ asset('js/booking-modal.js') }}"></script>

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\RoomType;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -76,10 +77,18 @@ class PmsApiService
 
     /**
      * Get room types grouped from PMS rooms data.
+     * Uses the dedicated room-types/prices endpoint for accurate pricing.
      */
     public function getRoomTypes(): array
     {
         return Cache::remember('pms_room_types', 300, function () {
+            // Prefer dedicated room-types/prices endpoint
+            $typePrices = $this->getRoomTypePrices();
+            if (! empty($typePrices)) {
+                return $this->buildRoomTypesFromPrices($typePrices);
+            }
+
+            // Fallback: group from /api/rooms
             $rooms = $this->getRooms();
             $types = [];
 
@@ -115,6 +124,32 @@ class PmsApiService
     }
 
     /**
+     * Build room types array from dedicated room-types/prices endpoint data.
+     */
+    private function buildRoomTypesFromPrices(array $typePrices): array
+    {
+        $types = [];
+
+        foreach ($typePrices as $type) {
+            $price = $type['prices']['effective_min'] ?? 0;
+            $types[] = [
+                'name' => $type['name'],
+                'key' => strtolower(str_replace(' ', '_', $type['name'])),
+                'rooms' => [],
+                'min_price' => $price,
+                'max_price' => $price,
+                'max_occupancy' => 2,
+                'facilities' => [],
+                'description' => $type['description'] ?? '',
+                'code' => $type['code'] ?? '',
+                'prices' => $type['prices'] ?? [],
+            ];
+        }
+
+        return $types;
+    }
+
+    /**
      * Create a reservation via PMS API.
      */
     public function createReservation(array $data): array
@@ -134,6 +169,80 @@ class PmsApiService
 
             return ['success' => false, 'errors' => [$e->getMessage()]];
         }
+    }
+
+    /**
+     * Ambil data tipe kamar dengan harga efektif dari PMS.
+     * Endpoint: GET /api/room-types/prices
+     */
+    public function getRoomTypePrices(): array
+    {
+        try {
+            $response = Http::withHeaders($this->headers())
+                ->timeout($this->timeout)
+                ->get("{$this->baseUrl}/api/room-types/prices");
+
+            if ($response->successful()) {
+                return $response->json('data') ?? [];
+            }
+
+            Log::warning('PMS API getRoomTypePrices failed', ['status' => $response->status()]);
+
+            return [];
+        } catch (\Exception $e) {
+            Log::error('PMS API getRoomTypePrices error: '.$e->getMessage());
+
+            return [];
+        }
+    }
+
+    /**
+     * Sinkronisasi harga tipe kamar dari PMS ke database lokal.
+     * Mencocokkan berdasarkan kode (code) atau nama.
+     *
+     * @return array{updated: int, failed: int, errors: array}
+     */
+    public function syncRoomTypePrices(): array
+    {
+        $pmsTypes = $this->getRoomTypePrices();
+        $updated = 0;
+        $failed = 0;
+        $errors = [];
+
+        if (empty($pmsTypes)) {
+            return ['updated' => 0, 'failed' => 0, 'errors' => ['No data from PMS']];
+        }
+
+        foreach ($pmsTypes as $pmsType) {
+            try {
+                // Cari local room type by code dulu, lalu by name
+                $local = RoomType::where('code', $pmsType['code'])
+                    ->orWhere('name', $pmsType['name'])
+                    ->first();
+
+                if (! $local) {
+                    $failed++;
+                    $errors[] = "Room type not found: {$pmsType['name']} ({$pmsType['code']})";
+
+                    continue;
+                }
+
+                $effectiveMin = $pmsType['prices']['effective_min'] ?? 0;
+
+                if ($effectiveMin > 0 && (float) $local->base_price !== (float) $effectiveMin) {
+                    $local->update(['base_price' => $effectiveMin]);
+                    $updated++;
+                }
+            } catch (\Exception $e) {
+                $failed++;
+                $errors[] = "Error updating {$pmsType['name']}: {$e->getMessage()}";
+            }
+        }
+
+        // Clear cache agar data terbaru dipakai
+        $this->clearCache();
+
+        return ['updated' => $updated, 'failed' => $failed, 'errors' => $errors];
     }
 
     /**

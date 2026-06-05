@@ -8,6 +8,8 @@ use App\Models\Contact;
 use App\Models\Facility;
 use App\Models\GalleryImage;
 use App\Models\RoomType;
+use App\Services\PmsApiService;
+use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
@@ -28,5 +30,26 @@ class DashboardController extends Controller
         $recentBookings = Booking::recent()->take(5)->get();
 
         return view('admin.dashboard', compact('stats', 'recentContacts', 'recentBookings'));
+    }
+
+    /**
+     * Trigger sinkronisasi harga dari PMS.
+     */
+    public function syncPrices(Request $request, PmsApiService $pms)
+    {
+        $result = $pms->syncRoomTypePrices();
+
+        if ($result['updated'] > 0) {
+            return redirect()->route('admin.dashboard')
+                ->with('success', "Harga berhasil disinkronisasi. {$result['updated']} tipe kamar diupdate.");
+        }
+
+        if (! empty($result['errors'])) {
+            return redirect()->route('admin.dashboard')
+                ->with('warning', 'Sinkronisasi selesai, tetapi ada beberapa masalah: '.implode(', ', $result['errors']));
+        }
+
+        return redirect()->route('admin.dashboard')
+            ->with('info', 'Semua harga sudah sesuai dengan PMS. Tidak ada perubahan.');
     }
 }

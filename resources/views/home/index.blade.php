@@ -9,8 +9,13 @@
     <div class="section-container">
         <div id="av-results" class="av-results" style="display:none;">
             <div class="av-results-header">
-                <i class="fa-solid fa-building"></i>
-                <span id="av-results-title">Checking availability...</span>
+                <div class="av-icon" id="av-results-icon">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
+                <div class="av-results-title" id="av-results-title">
+                    Check room availability by selecting dates above
+                </div>
+                <span class="av-results-status" id="av-results-status"></span>
             </div>
             <div id="av-results-types" class="av-results-types"></div>
         </div>

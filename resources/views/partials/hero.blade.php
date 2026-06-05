@@ -356,10 +356,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 {{-- CTA Button --}}
                 <div class="bw-action">
-                    <a href="#rooms" class="bw-btn" id="av-search-btn">
+                    <button type="button" class="bw-btn" id="av-search-btn">
                         <i class="fa-solid fa-magnifying-glass"></i>
                         <span>Search</span>
-                    </a>
+                    </button>
                 </div>
             </div>
 
