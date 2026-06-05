@@ -562,7 +562,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             // Call availability API (using key from .env via backend)
-            var url = '/webhotel/public/api/check-availability?check_in=' + encodeURIComponent(ci) + '&check_out=' + encodeURIComponent(co);
+            var url = '{{ route('api.check-availability') }}?check_in=' + encodeURIComponent(ci) + '&check_out=' + encodeURIComponent(co);
 
             fetch(url)
                 .then(function(response) { return response.json(); })
