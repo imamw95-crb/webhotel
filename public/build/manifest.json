@@ -1,6 +1,6 @@
 {
   "resources/css/animations.css": {
-    "file": "assets/animations-C6k-47wr.css",
+    "file": "assets/animations-DHRP4sD5.css",
     "name": "animations",
     "names": [
       "animations.css"
@@ -9,7 +9,7 @@
     "isEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-CDzUgGqc.css",
+    "file": "assets/app-WLt6ZiZL.css",
     "name": "app",
     "names": [
       "app.css"
@@ -27,7 +27,7 @@
     "isEntry": true
   },
   "resources/js/animations.js": {
-    "file": "assets/animations-BWGE6aLm.js",
+    "file": "assets/animations-Bw_chT-n.js",
     "name": "animations",
     "src": "resources/js/animations.js",
     "isEntry": true

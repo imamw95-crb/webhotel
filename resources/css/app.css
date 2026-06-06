@@ -163,14 +163,17 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 .spaces-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-md);
+    gap: 12px;
     perspective: 1400px;
 }
+@media (min-width: 1400px) {
+    .spaces-grid { gap: 16px; }
+}
 @media (max-width: 1024px) {
-    .spaces-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .spaces-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
 }
 @media (max-width: 640px) {
-    .spaces-grid { grid-template-columns: 1fr; gap: 12px; }
+    .spaces-grid { grid-template-columns: 1fr; gap: 8px; }
 }
 
 /* Bento size variants */
@@ -230,25 +233,32 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     }
 }
 
-/* Card inner */
+/* Card inner — compact & elegant */
 .space-card-inner {
     position: relative;
     width: 100%;
     height: 100%;
-    min-height: 240px;
+    min-height: 160px;
     overflow: hidden;
     border-radius: var(--radius-xl);
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.space-featured .space-card-inner { min-height: 400px; }
-.space-wide .space-card-inner { min-height: 300px; }
+.space-featured .space-card-inner { min-height: 280px; }
+.space-wide .space-card-inner { min-height: 200px; }
+@media (max-width: 1024px) {
+    .space-card-inner { min-height: 140px; }
+    .space-featured .space-card-inner { min-height: 220px; }
+    .space-wide .space-card-inner { min-height: 170px; }
+}
 @media (max-width: 640px) {
-    .space-card-inner { min-height: 200px; }
-    .space-featured .space-card-inner { min-height: 280px; }
-    .space-wide .space-card-inner { min-height: 240px; }
+    .space-card-inner { min-height: 120px; }
+    .space-featured .space-card-inner { min-height: 180px; }
+    .space-wide .space-card-inner { min-height: 150px; }
 }
 
 .space-card-img {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -306,7 +316,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     );
     display: flex;
     align-items: flex-end;
-    padding: var(--space-lg) var(--space-lg);
+    padding: var(--space-md) var(--space-md);
     transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .space-card:hover .space-card-overlay {
@@ -326,42 +336,42 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 
 .space-card-count {
     display: inline-block;
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: rgba(212, 175, 55, 0.9);
     background: rgba(212, 175, 55, 0.12);
-    padding: 3px 10px;
-    border-radius: 20px;
-    margin-bottom: var(--space-sm);
+    padding: 2px 8px;
+    border-radius: 16px;
+    margin-bottom: 6px;
 }
 
 .space-card-title {
     font-family: var(--font-display);
-    font-size: 20px;
+    font-size: 17px;
     font-weight: 500;
     color: #fff;
-    margin: 0 0 10px;
+    margin: 0 0 6px;
     line-height: 1.2;
 }
-.space-featured .space-card-title { font-size: 30px; }
-.space-wide .space-card-title { font-size: 26px; }
+.space-featured .space-card-title { font-size: 24px; }
+.space-wide .space-card-title { font-size: 20px; }
 .space-featured .space-card-btn,
-.space-wide .space-card-btn { padding: 10px 22px; font-size: 14px; }
+.space-wide .space-card-btn { padding: 8px 18px; font-size: 12px; }
 
 .space-card-btn {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    font-size: 13px;
+    gap: 6px;
+    font-size: 11px;
     font-weight: 600;
     color: #fff;
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    padding: 8px 18px;
-    border-radius: 24px;
+    padding: 6px 14px;
+    border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.15);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     cursor: pointer;
@@ -400,10 +410,29 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     opacity: 1;
 }
 
+/* Explore Our Spaces — compact elegant section */
+.explore-spaces-section {
+    --section-padding-compact: 56px;
+    padding-top: var(--section-padding-compact) !important;
+    padding-bottom: var(--section-padding-compact) !important;
+}
+
+/* Full-width container for gallery grid */
+.spaces-full {
+    max-width: 100%;
+    padding: 0 var(--space-lg);
+}
+
+@media (max-width: 640px) {
+    .spaces-full {
+        padding: 0 var(--space-md);
+    }
+}
+
 /* View Full Gallery CTA */
 .gallery-cta {
     text-align: center;
-    margin-top: var(--space-xl);
+    margin-top: var(--space-lg);
 }
 
 /* Back to Top Button */

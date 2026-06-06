@@ -1,12 +1,22 @@
 /* ============================================================
    ANIMATIONS — The Icon Hotel Kuningan
+   Smooth, premium animations — UI/UX Pro Max
    ============================================================ */
 
-/* ----- Reveal: Fade Up ----- */
+/* ----- Spring-like easing token (smooth, natural) ----- */
+:root {
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-bounce-out: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ============================================================
+   SCROLL REVEAL — Fade Up (spring)
+   ============================================================ */
 .reveal {
   opacity: 0;
   transform: translateY(40px);
-  transition: opacity 0.75s ease, transform 0.75s ease;
+  transition: opacity 0.8s var(--ease-spring), transform 0.8s var(--ease-spring);
 }
 
 .reveal.in {
@@ -14,11 +24,11 @@
   transform: translateY(0);
 }
 
-/* ----- Reveal: Fade From Left ----- */
+/* ----- Reveal: Fade From Left (spring) ----- */
 .reveal-left {
   opacity: 0;
   transform: translateX(-50px);
-  transition: opacity 0.75s ease, transform 0.75s ease;
+  transition: opacity 0.8s var(--ease-spring), transform 0.8s var(--ease-spring);
 }
 
 .reveal-left.in {
@@ -26,11 +36,11 @@
   transform: translateX(0);
 }
 
-/* ----- Reveal: Fade From Right ----- */
+/* ----- Reveal: Fade From Right (spring) ----- */
 .reveal-right {
   opacity: 0;
   transform: translateX(50px);
-  transition: opacity 0.75s ease, transform 0.75s ease;
+  transition: opacity 0.8s var(--ease-spring), transform 0.8s var(--ease-spring);
 }
 
 .reveal-right.in {
@@ -38,51 +48,75 @@
   transform: translateX(0);
 }
 
-/* ----- Staggered Children ----- */
+/* ----- Reveal: Scale In (for images/cards) ----- */
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 0.8s var(--ease-spring), transform 0.8s var(--ease-spring);
+}
+
+.reveal-scale.in {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ----- Reveal: Zoom In (hero/banner) ----- */
+.reveal-zoom {
+  opacity: 0;
+  transform: scale(1.12);
+  transition: opacity 1s var(--ease-smooth), transform 1s var(--ease-smooth);
+}
+
+.reveal-zoom.in {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ============================================================
+   STAGGERED CHILDREN — Smooth spring with 50ms gaps
+   ============================================================ */
 .stagger > * {
   opacity: 0;
   transform: translateY(30px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
+  transition: opacity 0.7s var(--ease-spring), transform 0.7s var(--ease-spring);
 }
 
 .stagger.in > *:nth-child(1)  { transition-delay: 0.00s; }
-.stagger.in > *:nth-child(2)  { transition-delay: 0.08s; }
-.stagger.in > *:nth-child(3)  { transition-delay: 0.16s; }
-.stagger.in > *:nth-child(4)  { transition-delay: 0.24s; }
-.stagger.in > *:nth-child(5)  { transition-delay: 0.32s; }
-.stagger.in > *:nth-child(6)  { transition-delay: 0.40s; }
-.stagger.in > *:nth-child(7)  { transition-delay: 0.48s; }
-.stagger.in > *:nth-child(8)  { transition-delay: 0.56s; }
-.stagger.in > *:nth-child(9)  { transition-delay: 0.64s; }
-.stagger.in > *:nth-child(10) { transition-delay: 0.64s; }
+.stagger.in > *:nth-child(2)  { transition-delay: 0.05s; }
+.stagger.in > *:nth-child(3)  { transition-delay: 0.10s; }
+.stagger.in > *:nth-child(4)  { transition-delay: 0.15s; }
+.stagger.in > *:nth-child(5)  { transition-delay: 0.20s; }
+.stagger.in > *:nth-child(6)  { transition-delay: 0.25s; }
+.stagger.in > *:nth-child(7)  { transition-delay: 0.30s; }
+.stagger.in > *:nth-child(8)  { transition-delay: 0.35s; }
+.stagger.in > *:nth-child(9)  { transition-delay: 0.40s; }
+.stagger.in > *:nth-child(10) { transition-delay: 0.45s; }
+.stagger.in > *:nth-child(11) { transition-delay: 0.50s; }
+.stagger.in > *:nth-child(12) { transition-delay: 0.55s; }
 
 .stagger.in > * {
   opacity: 1;
   transform: translateY(0);
 }
 
-/* ----- Bounce Y (Scroll Indicator) ----- */
+/* ============================================================
+   BOUNCE Y — Scroll Indicator / Floating Elements
+   ============================================================ */
 @keyframes bounce-y {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(10px);
-  }
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(10px); }
 }
 
 .bounce {
-  animation: bounce-y 1.6s ease-in-out infinite;
+  animation: bounce-y 1.6s var(--ease-smooth) infinite;
 }
 
-/* ----- Shimmer (Skeleton Loading) ----- */
+/* ============================================================
+   SHIMMER — Skeleton Loading
+   ============================================================ */
 @keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 .skeleton {
@@ -97,16 +131,227 @@
   border-radius: var(--radius-sm);
 }
 
-/* ----- Glow Pulse (CTA Buttons) ----- */
+/* ============================================================
+   GLOW PULSE — CTA Buttons
+   ============================================================ */
 @keyframes glow-pulse {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(201, 168, 76, 0.2);
-  }
-  50% {
-    box-shadow: 0 0 40px rgba(201, 168, 76, 0.4);
-  }
+  0%, 100% { box-shadow: 0 0 20px rgba(201, 168, 76, 0.2); }
+  50%      { box-shadow: 0 0 40px rgba(201, 168, 76, 0.4); }
 }
 
 .btn-glow {
-  animation: glow-pulse 2s ease-in-out infinite;
+  animation: glow-pulse 2s var(--ease-smooth) infinite;
+}
+
+/* ============================================================
+   FADE IN (simple)
+   ============================================================ */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s var(--ease-smooth) forwards;
+}
+
+/* ============================================================
+   SCALE ON PRESS — Interactive feedback (cards, buttons)
+   Uses transform only — GPU accelerated
+   ============================================================ */
+.scale-press {
+  transition: transform 0.15s var(--ease-spring);
+}
+
+.scale-press:active {
+  transform: scale(0.96);
+}
+
+/* ============================================================
+   IMAGE LOAD REVEAL — Smooth fade-in for lazy images
+   ============================================================ */
+.img-reveal {
+  opacity: 0;
+  transition: opacity 0.6s var(--ease-smooth);
+}
+
+.img-reveal.loaded {
+  opacity: 1;
+}
+
+/* ============================================================
+   FLOATING AMBIENT — Gentle float (decorative elements)
+   ============================================================ */
+@keyframes float-ambient {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  33%      { transform: translateY(-8px) rotate(0.5deg); }
+  66%      { transform: translateY(4px) rotate(-0.3deg); }
+}
+
+.float-ambient {
+  animation: float-ambient 6s var(--ease-smooth) infinite;
+}
+
+/* Slower variant */
+.float-ambient-slow {
+  animation: float-ambient 8s var(--ease-smooth) infinite;
+}
+
+/* ============================================================
+   PULSE SOFT — Gentle opacity pulse for subtle attention
+   ============================================================ */
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.7; }
+}
+
+.pulse-soft {
+  animation: pulse-soft 3s var(--ease-smooth) infinite;
+}
+
+/* ============================================================
+   GRADIENT SHIFT — Animated background gradient
+   ============================================================ */
+@keyframes gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.bg-animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+/* ============================================================
+   TEXT SPLIT REVEAL — For hero headings
+   Each word fades up in sequence
+   ============================================================ */
+.text-split-reveal {
+  overflow: hidden;
+}
+
+.text-split-reveal .split-word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s var(--ease-spring), transform 0.6s var(--ease-spring);
+}
+
+.text-split-reveal.in .split-word:nth-child(1) { transition-delay: 0.00s; }
+.text-split-reveal.in .split-word:nth-child(2) { transition-delay: 0.10s; }
+.text-split-reveal.in .split-word:nth-child(3) { transition-delay: 0.20s; }
+.text-split-reveal.in .split-word:nth-child(4) { transition-delay: 0.30s; }
+.text-split-reveal.in .split-word:nth-child(5) { transition-delay: 0.40s; }
+.text-split-reveal.in .split-word:nth-child(6) { transition-delay: 0.50s; }
+.text-split-reveal.in .split-word:nth-child(7) { transition-delay: 0.60s; }
+.text-split-reveal.in .split-word:nth-child(8) { transition-delay: 0.70s; }
+.text-split-reveal.in .split-word:nth-child(9) { transition-delay: 0.80s; }
+.text-split-reveal.in .split-word:nth-child(10){ transition-delay: 0.90s; }
+
+.text-split-reveal.in .split-word {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ============================================================
+   RIPPLE EFFECT — Click feedback on buttons
+   ============================================================ */
+.ripple-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-btn .ripple-effect {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(0);
+  animation: ripple-anim 0.6s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes ripple-anim {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* ============================================================
+   CARD HOVER — Smooth image zoom + shadow
+   ============================================================ */
+.card-img-zoom {
+  overflow: hidden;
+}
+
+.card-img-zoom img {
+  transition: transform 0.6s var(--ease-spring), filter 0.4s ease;
+}
+
+.card-img-zoom:hover img {
+  transform: scale(1.08);
+  filter: brightness(1.05);
+}
+
+/* ============================================================
+   COUNTER NUMBER — Smooth entrance
+   ============================================================ */
+@keyframes countEnter {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.count-num {
+  display: inline-block;
+}
+
+.count-num.animated {
+  animation: countEnter 0.4s var(--ease-spring) forwards;
+}
+
+/* ============================================================
+   SKELETON CARD — Loading placeholder pulse
+   ============================================================ */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.6; }
+}
+
+.skeleton-card {
+  animation: skeleton-pulse 1.8s ease-in-out infinite;
+}
+
+/* ============================================================
+   PARALLAX LAYER — Subtle movement
+   ============================================================ */
+.parallax-layer {
+  will-change: transform;
+}
+
+/* ============================================================
+   REDUCED MOTION — Respect user preference
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .reveal,
+  .reveal-left,
+  .reveal-right,
+  .reveal-scale,
+  .reveal-zoom,
+  .stagger > * {
+    opacity: 1;
+    transform: none;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
 }

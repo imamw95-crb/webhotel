@@ -55,9 +55,10 @@
 {{-- ============================================ --}}
 {{-- EXPLORE OUR SPACES SECTION — BENTO GRID --}}
 {{-- ============================================ --}}
-<section id="explore-spaces" class="section-padding" aria-labelledby="explore-heading">
+<section id="explore-spaces" class="section-padding explore-spaces-section" aria-labelledby="explore-heading">
+    {{-- Header (constrained) --}}
     <div class="section-container">
-        <div class="text-center mb-16 reveal">
+        <div class="text-center mb-10 reveal-scale">
             <span class="sec-label">{{ $sections['gallery_intro']['subtitle'] ?? 'Discover' }}</span>
             <h2 id="explore-heading" class="section-title">Explore Our Spaces</h2>
             <div class="gold-line centered"></div>
@@ -65,7 +66,10 @@
                 Take a visual tour through our rooms, facilities, and surroundings
             </p>
         </div>
+    </div>
 
+    {{-- Grid (full-width) --}}
+    <div class="spaces-full">
         @php
             $spaceCategories = $galleryImages->count() > 0
                 ? $galleryImages->groupBy('category')
@@ -123,7 +127,7 @@
 
             {{-- View Full Gallery CTA --}}
             <div class="gallery-cta reveal">
-                <a href="#" class="btn-gold" id="view-all-gallery" aria-label="View full gallery">
+                <a href="#" class="btn-gold ripple-btn" id="view-all-gallery" aria-label="View full gallery">
                     <i class="fa-solid fa-images" aria-hidden="true"></i>
                     View Full Gallery
                     <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
@@ -204,7 +208,7 @@
 
             {{-- View Full Gallery CTA --}}
             <div class="gallery-cta reveal">
-                <a href="#" class="btn-gold" id="view-all-gallery" aria-label="View full gallery">
+                <a href="#" class="btn-gold ripple-btn" id="view-all-gallery" aria-label="View full gallery">
                     <i class="fa-solid fa-images" aria-hidden="true"></i>
                     View Full Gallery
                     <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>

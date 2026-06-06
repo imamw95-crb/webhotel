@@ -9,7 +9,7 @@
             <div class="about-left reveal-left">
                 <div class="about-image-frame">
                     <div class="about-image-wrap">
-                        <img src="{{ asset('storage/room-types/executive/IMG_20260315_154656_154.jpg') }}"
+                        <img src="{{ asset('storage/Tampak depan hotel/IMG_20260307_194925_415.jpg') }}"
                              alt="The Icon Hotel Kuningan"
                              class="about-image"
                              loading="lazy"

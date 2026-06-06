@@ -137,11 +137,11 @@
                  data-slide="{{ $index }}"
                  aria-hidden="{{ $index !== 0 ? 'true' : 'false' }}">
                 <span class="sec-label">{{ $slide['label'] }}</span>
-                <h1 class="hero-title gradient-gold">{!! $slide['title'] !!}</h1>
+                <h1 class="hero-title gradient-gold text-split-reveal">{!! strip_tags($slide['title']) !!}</h1>
                 <p class="hero-subtitle">{{ $slide['desc'] }}</p>
                 <div class="hero-buttons">
-                    <button type="button" class="btn-gold" onclick="window.openBookingModal ? window.openBookingModal() : null">Book Now <i class="fa-solid fa-calendar-check"></i></button>
-                    <a href="#explore-spaces" class="btn-ghost">View Gallery</a>
+                    <button type="button" class="btn-gold ripple-btn" onclick="window.openBookingModal ? window.openBookingModal() : null">Book Now <i class="fa-solid fa-calendar-check"></i></button>
+                    <a href="#explore-spaces" class="btn-ghost ripple-btn">View Gallery</a>
                 </div>
             </div>
         @endforeach

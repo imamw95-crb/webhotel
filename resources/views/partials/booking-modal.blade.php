@@ -124,7 +124,7 @@
             </div>
 
             {{-- Submit --}}
-            <button type="submit" class="bm-submit-btn">
+            <button type="submit" class="bm-submit-btn ripple-btn">
                 <i class="fa-solid fa-calendar-check"></i>
                 Confirm Booking
             </button>

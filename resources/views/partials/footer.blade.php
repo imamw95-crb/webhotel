@@ -14,7 +14,7 @@
     ];
 @endphp
 
-<footer class="site-footer">
+<footer class="site-footer reveal">
     <div class="section-container">
         <div class="footer-grid">
             {{-- Brand --}}

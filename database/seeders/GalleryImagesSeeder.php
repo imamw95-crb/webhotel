@@ -21,7 +21,7 @@ class GalleryImagesSeeder extends Seeder
             // Executive
             ['title' => 'Executive Room', 'image_path' => 'room-types/executive/IMG_20260315_154622_380.jpg', 'category' => 'Executive', 'sort_order' => 6],
             ['title' => 'Executive - Angle 2', 'image_path' => 'room-types/executive/IMG_20260315_154645_649.jpg', 'category' => 'Executive', 'sort_order' => 7],
-            ['title' => 'Executive - Angle 3', 'image_path' => 'room-types/executive/IMG_20260315_154656_154.jpg', 'category' => 'Executive', 'sort_order' => 8],
+            ['title' => 'Executive - Angle 3', 'image_path' => 'Tampak depan hotel/IMG_20260307_194925_415.jpg', 'category' => 'Executive', 'sort_order' => 8],
             ['title' => 'Executive - Angle 4', 'image_path' => 'room-types/executive/IMG_20260315_154701_711.jpg', 'category' => 'Executive', 'sort_order' => 9],
             ['title' => 'Executive - Angle 5', 'image_path' => 'room-types/executive/IMG_20260315_154717_012.jpg', 'category' => 'Executive', 'sort_order' => 10],
             ['title' => 'Executive - Angle 6', 'image_path' => 'room-types/executive/IMG_20260315_154721_502.jpg', 'category' => 'Executive', 'sort_order' => 11],

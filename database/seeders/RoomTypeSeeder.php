@@ -46,7 +46,7 @@ class RoomTypeSeeder extends Seeder
                 'gallery' => [
                     'room-types/executive/IMG_20260315_154622_380.jpg',
                     'room-types/executive/IMG_20260315_154645_649.jpg',
-                    'room-types/executive/IMG_20260315_154656_154.jpg',
+                    'Tampak depan hotel/IMG_20260307_194925_415.jpg',
                     'room-types/executive/IMG_20260315_154701_711.jpg',
                     'room-types/executive/IMG_20260315_154713_515.jpg',
                     'room-types/executive/IMG_20260315_154717_012.jpg',

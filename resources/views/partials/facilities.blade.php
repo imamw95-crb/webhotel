@@ -45,7 +45,7 @@
                 @endphp
 
                 @foreach($facilityList as $fac)
-                    <div class="facility-card glass">
+                    <div class="facility-card glass scale-press">
                         <div class="facility-card-top"></div>
                         <div class="facility-card-inner">
                             <i class="{{ $fac['icon'] }} facility-icon"></i>

@@ -5,7 +5,7 @@
 <section id="rooms" class="section-padding rooms-section">
     <div class="section-container">
         {{-- Section Header --}}
-        <div class="rooms-header reveal">
+        <div class="rooms-header reveal-scale">
             <span class="sec-label">{{ $sections['rooms_intro']['subtitle'] ?? 'Accommodation' }}</span>
             <h2 class="section-title">{{ $sections['rooms_intro']['title'] ?? 'Find Your Perfect Stay' }}</h2>
             <div class="gold-line centered"></div>
@@ -29,7 +29,7 @@
                 (object)[
                     'name' => 'Executive Garden View',
                     'base_price' => 550000,
-                    'image_path' => 'room-types/executive/IMG_20260315_154656_154.jpg',
+                    'image_path' => 'Tampak depan hotel/IMG_20260307_194925_415.jpg',
                     'description' => 'Spacious executive room with stunning garden views and premium amenities.',
                     'facilities' => ['AC', 'TV', 'WiFi', 'Bathtub', 'Mini Bar'],
                     'max_occupancy' => 3,
@@ -135,7 +135,7 @@
                     $displayRooms[] = (object)[
                         'name' => $typeName,
                         'base_price' => $type['min_price'],
-                        'image_path' => $matchedImage ?? 'room-types/executive/IMG_20260315_154656_154.jpg',
+                        'image_path' => $matchedImage ?? 'Tampak depan hotel/IMG_20260307_194925_415.jpg',
                         'description' => $type['description'] ?? ($matched?->description ?? ''),
                         'facilities' => $type['facilities'] ?? ($matched?->facilities ?? []),
                         'max_occupancy' => $type['max_occupancy'] ?? ($matched?->max_occupancy ?? 2),
@@ -171,9 +171,9 @@
                     $isPopular = $priceNum >= 750000;
                     $isBestValue = $priceNum >= 350000 && $priceNum <= 450000;
                 @endphp
-                <div class="room-card card-dark">
-                    {{-- Image --}}
-                    <div class="room-card-img-wrap">
+                <div class="room-card card-dark scale-press">
+                    {{-- Image (fills entire card) --}}
+                    <div class="room-card-img-wrap card-img-zoom">
                         @if($imgPath)
                             <img src="{{ asset('storage/' . $imgPath) }}"
                                  alt="{{ $name }}"
@@ -198,38 +198,40 @@
                         <span class="room-badge badge-availability {{ $availClass }}"><span class="avail-dot"></span> {{ $availText }}</span>
                     </div>
 
-                    {{-- Body --}}
-                    <div class="room-card-body">
-                        <h3 class="room-name">{{ $name }}</h3>
-                        <p class="room-desc">{{ Illuminate\Support\Str::limit($desc, 120) }}</p>
+                    {{-- Curtain Content (slides up on hover) --}}
+                    <div class="room-curtain">
+                        <div class="room-curtain-inner">
+                            <h3 class="room-name">{{ $name }}</h3>
+                            <p class="room-desc">{{ Illuminate\Support\Str::limit($desc, 120) }}</p>
 
-                        {{-- Amenity Pills --}}
-                        @if(count($facilities) > 0)
-                            <div class="room-amenities">
-                                @foreach(array_slice($facilities, 0, 4) as $fac)
-                                    <span class="amenity-pill">{{ is_array($fac) ? ($fac['name'] ?? $fac) : $fac }}</span>
-                                @endforeach
-                                @if(count($facilities) > 4)
-                                    <span class="amenity-pill amenity-more">+{{ count($facilities) - 4 }}</span>
-                                @endif
+                            {{-- Amenity Pills --}}
+                            @if(count($facilities) > 0)
+                                <div class="room-amenities">
+                                    @foreach(array_slice($facilities, 0, 4) as $fac)
+                                        <span class="amenity-pill">{{ is_array($fac) ? ($fac['name'] ?? $fac) : $fac }}</span>
+                                    @endforeach
+                                    @if(count($facilities) > 4)
+                                        <span class="amenity-pill amenity-more">+{{ count($facilities) - 4 }}</span>
+                                    @endif
+                                </div>
+                            @endif
+
+                            {{-- Price Row --}}
+                            <div class="room-price-row">
+                                <span class="room-price">Rp {{ number_format($priceNum, 0, ',', '.') }}</span>
+                                <span class="room-price-label">/ night</span>
                             </div>
-                        @endif
 
-                        {{-- Price Row --}}
-                        <div class="room-price-row">
-                            <span class="room-price">Rp {{ number_format($priceNum, 0, ',', '.') }}</span>
-                            <span class="room-price-label">/ night</span>
-                        </div>
-
-                        {{-- Buttons --}}
-                        <div class="room-actions">
-                            <a href="#hero" class="btn-ghost small">Details</a>
-                            <button type="button"
-                                    class="btn-gold small book-now-btn"
-                                    data-room-type="{{ $name }}"
-                                    data-room-id="{{ is_array($room) ? ($room['id'] ?? '') : ($room->id ?? '') }}">
-                                Book Now
-                            </button>
+                            {{-- Buttons --}}
+                            <div class="room-actions">
+                                <a href="#hero" class="btn-ghost small ripple-btn">Details</a>
+                                <button type="button"
+                                        class="btn-gold small book-now-btn ripple-btn"
+                                        data-room-type="{{ $name }}"
+                                        data-room-id="{{ is_array($room) ? ($room['id'] ?? '') : ($room->id ?? '') }}">
+                                    Book Now
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -250,24 +252,64 @@
     margin-bottom: var(--space-3xl);
 }
 
-/* ---- Room Grid ---- */
+/* ---- Room Grid ----
+   3-column responsive grid with elegant spacing
+   ------------------------------------------------------- */
 .rooms-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
+    gap: 20px;
 }
 
-/* ---- Room Card ---- */
+@media (min-width: 1400px) {
+    .rooms-grid {
+        gap: 24px;
+    }
+}
+
+/* ============================================================
+   ROOM CARD — Curtain Reveal on Hover
+   Image fills card, content curtain slides up from bottom
+   ============================================================ */
 .room-card {
-    display: flex;
-    flex-direction: column;
+    position: relative;
     will-change: transform;
-    transition: box-shadow 0.4s ease, border-color 0.4s ease;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    transition: box-shadow 0.5s var(--ease-spring, cubic-bezier(0.16, 1, 0.3, 1)),
+                border-color 0.5s var(--ease-spring, cubic-bezier(0.16, 1, 0.3, 1)),
+                transform 0.5s var(--ease-spring, cubic-bezier(0.16, 1, 0.3, 1));
 }
 
+/* Gold border glow on hover */
+.room-card::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: calc(var(--radius-lg) + 1px);
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0), rgba(212, 175, 55, 0.3), rgba(212, 175, 55, 0));
+    opacity: 0;
+    transition: opacity 0.5s var(--ease-spring, cubic-bezier(0.16, 1, 0.3, 1));
+    z-index: 0;
+    pointer-events: none;
+}
+
+.room-card:hover::before {
+    opacity: 1;
+}
+
+.room-card > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* ---- Image Wrap (fills card) ---- */
 .room-card-img-wrap {
     position: relative;
-    aspect-ratio: 4 / 3;
+    width: 100%;
+    height: 300px;
     overflow: hidden;
     background: var(--bg-surface-2);
 }
@@ -276,11 +318,13 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.7s ease;
+    transition: transform 0.7s var(--ease-spring, cubic-bezier(0.16, 1, 0.3, 1)),
+                filter 0.5s ease;
 }
 
 .room-card:hover .room-card-img {
-    transform: scale(1.07);
+    transform: scale(1.1);
+    filter: brightness(1.1) contrast(1.08);
 }
 
 .room-card-img-placeholder {
@@ -291,6 +335,7 @@
     justify-content: center;
     color: var(--text-muted);
     font-size: 32px;
+    background: var(--bg-surface-2);
 }
 
 .no-img {
@@ -303,12 +348,17 @@
     inset: 0;
     background: linear-gradient(
         to top,
-        rgba(9, 9, 15, 0.7) 0%,
-        rgba(9, 9, 15, 0.1) 40%,
-        transparent 70%
+        rgba(9, 9, 15, 0.9) 0%,
+        rgba(9, 9, 15, 0.3) 40%,
+        rgba(9, 9, 15, 0.05) 70%
     );
     z-index: 1;
     pointer-events: none;
+    transition: opacity 0.5s ease;
+}
+
+.room-card:hover .room-card-img-overlay {
+    opacity: 0.9;
 }
 
 /* ---- Badges ---- */
@@ -320,10 +370,12 @@
     padding: 6px 14px;
     border-radius: var(--radius-full);
     text-transform: uppercase;
-    z-index: 2;
+    z-index: 5;
     display: inline-flex;
     align-items: center;
     gap: 5px;
+    transition: transform 0.4s var(--ease-spring, cubic-bezier(0.16, 1, 0.3, 1)),
+                box-shadow 0.4s ease;
 }
 
 .badge-popular {
@@ -335,8 +387,11 @@
     animation: badgePulse 2s ease-in-out infinite;
 }
 
-.badge-popular i {
-    font-size: 10px;
+.badge-popular i { font-size: 10px; }
+
+.room-card:hover .badge-popular {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 24px rgba(212, 175, 55, 0.5);
 }
 
 .badge-value {
@@ -347,8 +402,10 @@
     backdrop-filter: blur(8px);
 }
 
-.badge-value i {
-    font-size: 10px;
+.badge-value i { font-size: 10px; }
+
+.room-card:hover .badge-value {
+    transform: translateY(-2px) scale(1.05);
 }
 
 @keyframes badgePulse {
@@ -363,6 +420,10 @@
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.room-card:hover .badge-availability {
+    transform: translateY(-2px);
 }
 
 .avail-dot {
@@ -384,34 +445,80 @@
     50% { opacity: 0.5; transform: scale(0.8); }
 }
 
-.avail-available {
-    color: #4ade80;
+.avail-available { color: #4ade80; }
+.avail-unavailable { color: #f87171; }
+
+/* ============================================================
+   CURTAIN REVEAL — Content slides up from bottom on hover
+   ============================================================ */
+.room-curtain {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 3;
+    transform: translateY(calc(100% - 64px)); /* show only name area by default */
+    transition: transform 0.55s var(--ease-spring, cubic-bezier(0.16, 1, 0.3, 1));
+    will-change: transform;
 }
 
-.avail-unavailable {
-    color: #f87171;
+.room-card:hover .room-curtain {
+    transform: translateY(0); /* fully reveal on hover */
 }
 
-/* ---- Card Body ---- */
-.room-card-body {
+.room-curtain-inner {
     padding: 20px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    flex: 1;
+    gap: 10px;
+    background: linear-gradient(
+        to top,
+        var(--bg-surface) 0%,
+        var(--bg-surface) 70%,
+        rgba(17, 17, 25, 0.95) 100%
+    );
+    border-top: 1px solid var(--border-default);
 }
 
+/* ---- Curtain Children Staggered Entrance ---- */
+.room-curtain-inner > * {
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.4s ease, transform 0.4s var(--ease-spring, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.room-card:hover .room-curtain-inner > * {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.room-card:hover .room-curtain-inner > *:nth-child(1) { transition-delay: 0.05s; }
+.room-card:hover .room-curtain-inner > *:nth-child(2) { transition-delay: 0.10s; }
+.room-card:hover .room-curtain-inner > *:nth-child(3) { transition-delay: 0.15s; }
+.room-card:hover .room-curtain-inner > *:nth-child(4) { transition-delay: 0.20s; }
+.room-card:hover .room-curtain-inner > *:nth-child(5) { transition-delay: 0.25s; }
+.room-card:hover .room-curtain-inner > *:nth-child(6) { transition-delay: 0.30s; }
+
+/* ---- Room Name (always visible in peek state) ---- */
 .room-name {
     font-family: var(--font-display);
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 500;
     color: var(--text-primary);
     margin: 0;
     line-height: 1.3;
+    transition: color 0.3s ease;
+    /* Always visible at bottom peek */
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
+.room-card:hover .room-name {
+    color: var(--gold-primary);
 }
 
 .room-desc {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--text-secondary);
     line-height: 1.6;
     margin: 0;
@@ -425,22 +532,35 @@
 .room-amenities {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 5px;
 }
 
 .amenity-pill {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 500;
-    padding: 4px 10px;
+    padding: 3px 9px;
     border-radius: var(--radius-full);
     background: var(--bg-surface-2);
     color: var(--text-secondary);
     border: 1px solid var(--border-default);
+    transition: all 0.3s var(--ease-spring, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.room-card:hover .amenity-pill {
+    background: rgba(212, 175, 55, 0.08);
+    border-color: rgba(212, 175, 55, 0.2);
+    color: var(--text-primary);
+    transform: translateY(-1px);
 }
 
 .amenity-more {
     color: var(--gold-primary);
     border-color: rgba(201, 168, 76, 0.2);
+}
+
+.room-card:hover .amenity-more {
+    background: rgba(212, 175, 55, 0.15);
+    border-color: var(--gold-primary);
 }
 
 /* ---- Price ---- */
@@ -452,27 +572,33 @@
 
 .room-price {
     font-family: var(--font-display);
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 600;
     color: var(--gold-primary);
+    transition: text-shadow 0.3s ease;
+}
+
+.room-card:hover .room-price {
+    text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
 }
 
 .room-price-label {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text-muted);
 }
 
 /* ---- Actions ---- */
 .room-actions {
     display: flex;
-    gap: 10px;
-    margin-top: auto;
-    padding-top: 8px;
+    gap: 8px;
+    margin-top: 2px;
 }
 
 .room-actions .btn-ghost,
 .room-actions .btn-gold {
     flex: 1;
+    padding: 10px 18px;
+    font-size: 11px;
 }
 
 /* ---- Responsive ---- */
@@ -480,6 +606,10 @@
     .rooms-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 20px;
+    }
+
+    .room-card-img-wrap {
+        height: 280px;
     }
 }
 
@@ -523,13 +653,25 @@
         border-radius: 4px;
     }
 
-    /* Scroll fade hint */
-    .rooms-grid::after {
-        content: '';
-        display: block;
-        min-width: 8px;
-        height: 1px;
-        flex-shrink: 0;
+    .room-card-img-wrap {
+        height: 260px;
+    }
+
+    .room-curtain {
+        transform: translateY(calc(100% - 56px));
+    }
+
+    .room-curtain-inner {
+        padding: 14px;
+        gap: 8px;
+    }
+
+    .room-name {
+        font-size: 17px;
+    }
+
+    .room-price {
+        font-size: 16px;
     }
 
     .room-card {
@@ -547,7 +689,7 @@
         transform: scale(0.98);
     }
 
-    .room-card-body {
+    .room-curtain-inner {
         padding: 16px;
         gap: 10px;
     }
@@ -606,7 +748,7 @@
     }
 
     .room-card-img-wrap {
-        aspect-ratio: 16 / 10;
+        height: 220px;
     }
 }
 
@@ -615,7 +757,7 @@
         min-width: 260px;
     }
 
-    .room-card-body {
+    .room-curtain-inner {
         padding: 14px;
         gap: 8px;
     }

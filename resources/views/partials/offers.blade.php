@@ -81,7 +81,7 @@
                         <p class="offer-valid"><i class="fa-regular fa-clock"></i> {{ $offer['valid'] }}</p>
 
                         {{-- CTA --}}
-                        <button type="button" class="btn-gold small offer-btn" onclick="window.openBookingModal ? window.openBookingModal() : null">
+                        <button type="button" class="btn-gold small offer-btn ripple-btn" onclick="window.openBookingModal ? window.openBookingModal() : null">
                             Book This Offer <i class="fa-solid fa-arrow-right"></i>
                         </button>
                     </div>

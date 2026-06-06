@@ -5,7 +5,7 @@
 
 <section class="social-proof-section">
     <div class="section-container">
-        <div class="social-proof-bar reveal">
+        <div class="social-proof-bar reveal-scale">
             <div class="sp-item">
                 <div class="sp-icon">
                     <i class="fa-solid fa-building"></i>
@@ -48,7 +48,7 @@
                 </div>
                 <div class="sp-content">
                     <span class="sp-number">2026</span>
-                    <span class="sp-label">Award Winner</span>
+                    <span class="sp-label">First Choice</span>
                 </div>
             </div>
         </div>
