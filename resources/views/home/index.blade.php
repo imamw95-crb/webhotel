@@ -53,16 +53,16 @@
 @include('partials.testimonials')
 
 {{-- ============================================ --}}
-{{-- EXPLORE OUR SPACES SECTION — BENTO GRID --}}
+{{-- EXPLORE OUR SPACES SECTION — Dark Luxury --}}
 {{-- ============================================ --}}
 <section id="explore-spaces" class="section-padding explore-spaces-section" aria-labelledby="explore-heading">
     {{-- Header (constrained) --}}
     <div class="section-container">
-        <div class="text-center mb-10 reveal-scale">
-            <span class="sec-label">{{ $sections['gallery_intro']['subtitle'] ?? 'Discover' }}</span>
-            <h2 id="explore-heading" class="section-title">Explore Our Spaces</h2>
+        <div class="text-center mb-12 reveal">
+            <span class="sec-label">Gallery</span>
+            <h2 id="explore-heading" class="explore-heading-ref">Explore Our Spaces</h2>
             <div class="gold-line centered"></div>
-            <p class="text-secondary" style="max-width:600px;margin:0 auto;color:var(--text-secondary);font-size:15px;">
+            <p class="explore-subtitle-ref">
                 Take a visual tour through our rooms, facilities, and surroundings
             </p>
         </div>
@@ -79,10 +79,8 @@
         @if($spaceCategories->count() > 0)
             @php
                 $sorted = $spaceCategories->sortByDesc(fn($imgs) => $imgs->count());
-                $idx = 0;
-                $total = $sorted->count();
             @endphp
-            <div id="spaces-grid" class="spaces-grid stagger" role="list" aria-label="Photo gallery categories">
+            <div id="spaces-grid" class="spaces-grid-ref stagger" role="list" aria-label="Photo gallery categories">
                 @foreach($sorted as $cat => $imgs)
                     @php
                         $first = $imgs->first();
@@ -91,15 +89,8 @@
                             'src' => asset('storage/' . $i->image_path),
                             'title' => $i->title,
                         ]);
-                        $sizeClass = '';
-                        if ($idx === 0 && $total > 2) {
-                            $sizeClass = 'space-featured';
-                        } elseif ($idx % 3 === 0 && $total > 4) {
-                            $sizeClass = 'space-wide';
-                        }
-                        $idx++;
                     @endphp
-                    <div class="space-card {{ $sizeClass }}"
+                    <div class="space-card scale-press"
                          data-category="{{ $cat }}"
                          data-photos='{{ json_encode($photoData) }}'
                          role="listitem"
@@ -112,11 +103,11 @@
                                  class="space-card-img"
                                  loading="lazy">
                             <div class="space-card-overlay">
-                                <div class="space-card-content">
-                                    <span class="space-card-count">{{ $count }} {{ $count === 1 ? 'Photo' : 'Photos' }}</span>
-                                    <h3 class="space-card-title">{{ $cat }}</h3>
-                                    <span class="space-card-btn">
-                                        Explore <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                                <div class="space-card-label">
+                                    <span class="space-card-name">{{ $cat }}</span>
+                                    <span class="space-card-count">
+                                        <i class="fa-regular fa-image" aria-hidden="true"></i>
+                                        {{ $count }} photos
                                     </span>
                                 </div>
                             </div>
@@ -126,8 +117,8 @@
             </div>
 
             {{-- View Full Gallery CTA --}}
-            <div class="gallery-cta reveal">
-                <a href="#" class="btn-gold ripple-btn" id="view-all-gallery" aria-label="View full gallery">
+            <div class="gallery-cta-ref reveal">
+                <a href="#" class="btn-gold btn-glow ripple-btn" id="view-all-gallery" aria-label="View full gallery">
                     <i class="fa-solid fa-images" aria-hidden="true"></i>
                     View Full Gallery
                     <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
@@ -167,21 +158,10 @@
                 ];
                 // Sort by count desc for bento layout
                 $sortedFallback = collect($fallbackCategories)->sortByDesc('count');
-                $fIdx = 0;
-                $fTotal = $sortedFallback->count();
             @endphp
-            <div id="spaces-grid" class="spaces-grid stagger" role="list" aria-label="Photo gallery categories">
+            <div id="spaces-grid" class="spaces-grid-ref stagger" role="list" aria-label="Photo gallery categories">
                 @foreach($sortedFallback as $cat => $data)
-                    @php
-                        $sizeClass = '';
-                        if ($fIdx === 0 && $fTotal > 2) {
-                            $sizeClass = 'space-featured';
-                        } elseif ($fIdx % 3 === 0 && $fTotal > 4) {
-                            $sizeClass = 'space-wide';
-                        }
-                        $fIdx++;
-                    @endphp
-                    <div class="space-card {{ $sizeClass }}"
+                    <div class="space-card scale-press"
                          data-category="{{ $cat }}"
                          role="listitem"
                          tabindex="0"
@@ -193,11 +173,11 @@
                                  class="space-card-img"
                                  loading="lazy">
                             <div class="space-card-overlay">
-                                <div class="space-card-content">
-                                    <span class="space-card-count">{{ $data['count'] }} Photos</span>
-                                    <h3 class="space-card-title">{{ $cat }}</h3>
-                                    <span class="space-card-btn">
-                                        Explore <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                                <div class="space-card-label">
+                                    <span class="space-card-name">{{ $cat }}</span>
+                                    <span class="space-card-count">
+                                        <i class="fa-regular fa-image" aria-hidden="true"></i>
+                                        {{ $data['count'] }} photos
                                     </span>
                                 </div>
                             </div>
@@ -207,8 +187,8 @@
             </div>
 
             {{-- View Full Gallery CTA --}}
-            <div class="gallery-cta reveal">
-                <a href="#" class="btn-gold ripple-btn" id="view-all-gallery" aria-label="View full gallery">
+            <div class="gallery-cta-ref reveal">
+                <a href="#" class="btn-gold btn-glow ripple-btn" id="view-all-gallery" aria-label="View full gallery">
                     <i class="fa-solid fa-images" aria-hidden="true"></i>
                     View Full Gallery
                     <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>

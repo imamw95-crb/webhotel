@@ -172,10 +172,6 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 @media (max-width: 1024px) {
     .spaces-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
 }
-@media (max-width: 640px) {
-    .spaces-grid { grid-template-columns: 1fr; gap: 8px; }
-}
-
 /* Bento size variants */
 .space-card.space-featured {
     grid-column: span 2;
@@ -186,6 +182,21 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 }
 .space-card.space-full {
     grid-column: 1 / -1;
+}
+
+/* Mobile: single column — no spanning to prevent 0-width implicit columns */
+@media (max-width: 640px) {
+    .spaces-grid { grid-template-columns: 1fr; gap: 8px; }
+    .space-card.space-featured {
+        grid-column: span 1;
+        grid-row: span 1;
+    }
+    .space-card.space-wide {
+        grid-column: span 1;
+    }
+    .space-card.space-full {
+        grid-column: 1 / -1;
+    }
 }
 
 /* --- Space Card --- */
@@ -410,11 +421,289 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     opacity: 1;
 }
 
-/* Explore Our Spaces — compact elegant section */
+/* ============================================================
+   EXPLORE OUR SPACES — Dark Luxury Theme (UI/UX Pro Max)
+   Blended with the existing dark gold/navy identity
+   ============================================================ */
+
 .explore-spaces-section {
-    --section-padding-compact: 56px;
-    padding-top: var(--section-padding-compact) !important;
-    padding-bottom: var(--section-padding-compact) !important;
+    background: var(--bg-page);
+    border-top: 1px solid var(--border-default);
+    padding-top: var(--space-4xl) !important;
+    padding-bottom: var(--space-4xl) !important;
+}
+
+.explore-spaces-section .section-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Dark luxury heading — matches other section titles */
+.explore-heading-ref {
+    font-family: var(--font-display);
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 300;
+    color: var(--text-primary);
+    text-align: center;
+    margin: 0 0 var(--space-sm);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+}
+
+.explore-subtitle-ref {
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: var(--text-secondary);
+    text-align: center;
+    max-width: 560px;
+    margin: 0 auto;
+    line-height: 1.7;
+}
+
+/* Dark luxury bento grid */
+.spaces-grid-ref {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+}
+
+@media (max-width: 1100px) {
+    .spaces-grid-ref { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+}
+@media (max-width: 768px) {
+    .spaces-grid-ref { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+}
+@media (max-width: 480px) {
+    .spaces-grid-ref { grid-template-columns: 1fr; gap: 10px; }
+}
+
+/* Dark luxury card — glassmorphism with gold accent */
+.spaces-grid-ref .space-card {
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    aspect-ratio: 4 / 3;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.spaces-grid-ref .space-card:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-gold), 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+.spaces-grid-ref .space-card:active {
+    transform: translateY(-2px) scale(0.98);
+}
+
+.spaces-grid-ref .space-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+}
+
+.spaces-grid-ref .space-card-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.6s ease;
+}
+
+.spaces-grid-ref .space-card:hover .space-card-img {
+    transform: scale(1.08);
+}
+
+/* Cinematic gradient overlay — always visible */
+.spaces-grid-ref .space-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to top,
+        rgba(9, 9, 15, 0.92) 0%,
+        rgba(9, 9, 15, 0.35) 35%,
+        rgba(9, 9, 15, 0.05) 60%,
+        transparent 80%
+    );
+    display: flex;
+    align-items: flex-end;
+    padding: var(--space-md);
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 2;
+}
+.spaces-grid-ref .space-card:hover .space-card-overlay {
+    background: linear-gradient(
+        to top,
+        rgba(9, 9, 15, 0.95) 0%,
+        rgba(9, 9, 15, 0.45) 35%,
+        rgba(9, 9, 15, 0.08) 60%,
+        transparent 85%
+    );
+}
+
+/* Category label at bottom */
+.spaces-grid-ref .space-card-label {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.spaces-grid-ref .space-card-name {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 500;
+    color: #fff;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Photo count badge */
+.spaces-grid-ref .space-card-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--gold-primary);
+    background: rgba(201, 168, 76, 0.12);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(201, 168, 76, 0.15);
+    width: fit-content;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.spaces-grid-ref .space-card:hover .space-card-count {
+    background: var(--gold-primary);
+    color: #09090f;
+    border-color: var(--gold-primary);
+}
+
+/* Gold border glow on hover */
+.spaces-grid-ref .space-card-inner::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: var(--radius-lg);
+    border: 2px solid transparent;
+    background: linear-gradient(135deg, var(--gold-primary), rgba(201, 168, 76, 0.1), transparent 60%) border-box;
+    -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    z-index: 5;
+    pointer-events: none;
+}
+.spaces-grid-ref .space-card:hover .space-card-inner::after {
+    opacity: 1;
+}
+
+/* Skeleton loader */
+.spaces-grid-ref .space-card-skeleton {
+    position: absolute;
+    inset: 0;
+    background: var(--bg-surface);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    z-index: 1;
+}
+.spaces-grid-ref .space-card-skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.04) 50%,
+        transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.8s ease-in-out infinite;
+}
+
+/* Hide old btn inside ref grid */
+.spaces-grid-ref .space-card-btn {
+    display: none !important;
+}
+
+/* Dark CTA */
+.gallery-cta-ref {
+    text-align: center;
+    margin-top: 40px;
+}
+
+.gallery-cta-ref .btn-gold {
+    padding: 14px 34px;
+    font-size: 13px;
+}
+
+/* Staggered entrance — dark luxury variant */
+.spaces-grid-ref.stagger > .space-card {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform, opacity;
+}
+
+.spaces-grid-ref.stagger.in > .space-card {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Stagger delays */
+.spaces-grid-ref.stagger.in > .space-card:nth-child(1)  { transition-delay: 0.00s; }
+.spaces-grid-ref.stagger.in > .space-card:nth-child(2)  { transition-delay: 0.05s; }
+.spaces-grid-ref.stagger.in > .space-card:nth-child(3)  { transition-delay: 0.10s; }
+.spaces-grid-ref.stagger.in > .space-card:nth-child(4)  { transition-delay: 0.15s; }
+.spaces-grid-ref.stagger.in > .space-card:nth-child(5)  { transition-delay: 0.20s; }
+.spaces-grid-ref.stagger.in > .space-card:nth-child(6)  { transition-delay: 0.25s; }
+.spaces-grid-ref.stagger.in > .space-card:nth-child(7)  { transition-delay: 0.30s; }
+.spaces-grid-ref.stagger.in > .space-card:nth-child(8)  { transition-delay: 0.35s; }
+.spaces-grid-ref.stagger.in > .space-card:nth-child(9)  { transition-delay: 0.40s; }
+.spaces-grid-ref.stagger.in > .space-card:nth-child(10) { transition-delay: 0.45s; }
+.spaces-grid-ref.stagger.in > .space-card:nth-child(11) { transition-delay: 0.50s; }
+.spaces-grid-ref.stagger.in > .space-card:nth-child(12) { transition-delay: 0.55s; }
+.spaces-grid-ref.stagger.in > .space-card:nth-child(13) { transition-delay: 0.60s; }
+.spaces-grid-ref.stagger.in > .space-card:nth-child(14) { transition-delay: 0.65s; }
+.spaces-grid-ref.stagger.in > .space-card:nth-child(15) { transition-delay: 0.70s; }
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .spaces-grid-ref.stagger > .space-card {
+        transform: translateY(20px);
+        transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .spaces-grid-ref.stagger.in > .space-card {
+        transform: translateY(0);
+        transition-delay: 0s !important;
+    }
+    .spaces-grid-ref .space-card:hover {
+        transform: none;
+    }
+    .spaces-grid-ref .space-card:hover .space-card-img {
+        transform: none;
+    }
+    .spaces-grid-ref .space-card-inner::after {
+        display: none;
+    }
 }
 
 /* Full-width container for gallery grid */
