@@ -1,58 +1,174 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+    <img src="https://img.shields.io/badge/Laravel-13-F9322C?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel">
+    <img src="https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS">
+    <img src="https://img.shields.io/badge/Alpine.js-3-8BC0D0?style=for-the-badge&logo=alpinedotjs&logoColor=white" alt="Alpine.js">
+    <img src="https://img.shields.io/badge/PHP-8.3-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP">
 </p>
 
-## About Laravel
+# The Icon Hotel — Website
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+> **Website reservasi hotel modern** — Front-end publik untuk The Icon Hotel Kuningan, terintegrasi dengan **Hotel PMS** (Property Management System) untuk manajemen kamar, reservasi, dan pembayaran secara real-time.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## ✨ Fitur
 
-## Learning Laravel
+### 🌐 Public Website
+| Fitur | Keterangan |
+|-------|-----------|
+| **Hero + Booking Form** | Booking form dengan date picker, kapasitas tamu, dan math CAPTCHA |
+| **Cek Ketersediaan Real-time** | AJAX check availability via PMS API (cache 2 menit) |
+| **Daftar Kamar** | Tampilan tipe kamar dengan harga sinkron dari PMS |
+| **Galeri & Fasilitas** | Galeri gambar hotel, daftar fasilitas dengan ikon |
+| **Halaman Pelacakan Booking** | Lacak booking via kode unik (contoh: `ICN-A7B3K9`) |
+| **Konfirmasi Booking** | Halaman konfirmasi dengan detail pembayaran bank |
+| **Payment Gateway** | Integrasi **Midtrans** (Snap) + petunjuk transfer bank |
+| **Contact Form** | Form kontak dengan honeypot anti-spam + rate limiting |
+| **Anti-Spam Protection** | Honeypot fields, Math CAPTCHA, Rate Limiting (3 percobaan/5 detik) |
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 🔐 Admin Panel
+| Fitur | Keterangan |
+|-------|-----------|
+| **Dashboard** | Statistik: total booking, room types, gallery, pesan, dll |
+| **Manajemen Booking** | Lihat, konfirmasi, batalkan, hapus booking + kirim email notifikasi |
+| **Invoice PDF** | Generate & download invoice otomatis (via DomPDF) |
+| **Room Types CRUD** | Kelola tipe kamar, harga, kapasitas, gambar, fasilitas |
+| **Fasilitas CRUD** | Kelola daftar fasilitas hotel dengan ikon |
+| **Galeri CRUD** | Upload & kelola gambar galeri (WebP/JPG/PNG, max 5MB) |
+| **Page Sections** | Edit konten halaman (hero, about, offers, dll) |
+| **Settings** | Konfigurasi: info hotel, kontak, bank, sosial media, SEO |
+| **Sync Harga dari PMS** | Sinkronisasi harga tipe kamar otomatis dari PMS API |
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### ⚙️ Services & Integrasi
+| Service | Peran |
+|---------|-------|
+| **PmsApiService** | HTTP client ke PMS API (endpoints: rooms, availability, reservasi, harga) |
+| **MidtransService** | Payment gateway via Midtrans Snap (bank transfer, QR, dll) |
+| **ReCaptchaService** | Google reCAPTCHA v2 server-side verification |
+| **SyncPmsReservation Job** | Queue job untuk sinkron booking ke PMS (3x retry, 10s backoff) |
+| **Email Notifications** | Auto-email: konfirmasi booking, notifikasi admin, status change |
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+---
 
-## Agentic Development
+## 🏗️ Arsitektur
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```mermaid
+flowchart LR
+    User[User/Website] --> Webhotel[Webhotel Laravel]
+    Webhotel --> PMS[Hotel PMS API]
+    Webhotel --> Midtrans[Midtrans Gateway]
+    Webhotel --> Mail[Email Notifications]
+    PMS --> DB[(MySQL Hotel)]
+    Webhotel --> WebDB[(MySQL Website)]
+    
+    style User fill:#D4AF37,color:#1B2A4A
+    style Webhotel fill:#1B2A4A,color:#fff
+    style PMS fill:#1B2A4A,color:#fff
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### Alur Booking
+1. User isi form booking → validasi + captcha
+2. Cek ketersediaan via PMS API (`/api/rooms/available`)
+3. Simpan booking ke database lokal
+4. Kirim email konfirmasi ke guest + notifikasi ke admin
+5. Dispatch job `SyncPmsReservation` → buat reservasi di PMS
+6. User bayar via Midtrans / transfer bank
+7. Admin konfirmasi booking → status berubah
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 🚀 Tech Stack
 
-## Code of Conduct
+| Teknologi | Versi | Kegunaan |
+|-----------|-------|----------|
+| **PHP** | 8.3+ | Backend |
+| **Laravel** | 13.x | Framework |
+| **Tailwind CSS** | 4.x | Utility-first CSS |
+| **Alpine.js** | 3.x | Interaktivitas frontend |
+| **Vite** | 8.x | Asset bundling |
+| **MySQL** | 8.x | Database |
+| **Midtrans** | 2.6 | Payment gateway |
+| **DomPDF** | 3.1 | Invoice PDF generation |
+| **Guzzle** | 7.x | HTTP client ke PMS API |
+| **Laravel Queue** | - | Async job processing |
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+## 📦 Instalasi
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+# Clone repository
+git clone https://github.com/your-org/webhotel.git
+cd webhotel
 
-## License
+# Install dependencies
+composer install
+npm install
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# Environment
+cp .env.example .env
+php artisan key:generate
+
+# Konfigurasi .env untuk database & PMS API
+# PMS_API_URL=http://127.0.0.1:8000
+# PMS_API_KEY=your-api-key
+
+# Migrasi database
+php artisan migrate
+
+# Build assets
+npm run build
+
+# Development
+composer run dev
+```
+
+---
+
+## 🔗 Integrasi PMS API
+
+Webhotel terintegrasi dengan [Hotel PMS](https://github.com/your-org/hotel-pms) melalui REST API:
+
+| Method | Endpoint | Fungsi |
+|--------|----------|--------|
+| `GET` | `/api/rooms` | Daftar semua kamar |
+| `GET` | `/api/rooms/available` | Kamar tersedia (filter tgl) |
+| `GET` | `/api/room-types/prices` | Tipe kamar + harga efektif |
+| `POST` | `/api/reservations` | Buat reservasi baru |
+
+Authentikasi via header `X-API-Key`.
+
+---
+
+## 🗂️ Struktur Database
+
+### Tables (Website)
+- `room_types` — Tipe kamar dengan harga, kapasitas, gambar
+- `facilities` — Fasilitas hotel
+- `gallery_images` — Galeri foto hotel
+- `website_settings` — Konfigurasi website (key-value)
+- `page_sections` — Konten halaman (hero, about, offers)
+- `contacts` — Pesan dari form kontak
+- `bookings` — Booking dari website
+
+---
+
+## 🧪 Testing
+
+```bash
+php artisan test --compact
+```
+
+---
+
+## 👨‍💼 Admin Credentials (Dev)
+
+- **URL:** `/admin/login`
+- **Username:** `admin`
+- **Password:** `password`
+
+---
+
+## 📄 License
+
+**The Icon Hotel Website** — Proprietary. All rights reserved.

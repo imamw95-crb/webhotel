@@ -65,6 +65,9 @@
                 <a href="{{ route('admin.gallery.index') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-lg {{ request()->routeIs('admin.gallery.*') ? 'bg-gold-400 text-navy-900 font-semibold' : 'text-gray-300 hover:bg-white/10' }}">
                     <i class="fa-solid fa-images w-5"></i> Gallery
                 </a>
+                <a href="{{ route('admin.contacts.index') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-lg {{ request()->routeIs('admin.contacts.*') ? 'bg-gold-400 text-navy-900 font-semibold' : 'text-gray-300 hover:bg-white/10' }}">
+                    <i class="fa-solid fa-envelope w-5"></i> Messages
+                </a>
                 <a href="{{ route('admin.sections.index') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-lg {{ request()->routeIs('admin.sections.*') ? 'bg-gold-400 text-navy-900 font-semibold' : 'text-gray-300 hover:bg-white/10' }}">
                     <i class="fa-solid fa-pager w-5"></i> Page Sections
                 </a>

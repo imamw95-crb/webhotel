@@ -5,14 +5,45 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Mail\BookingStatusChanged;
 use App\Models\Booking;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class BookingController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $bookings = Booking::recent()->paginate(20);
+        $query = Booking::query();
+
+        // Search by name, email, phone, or booking code
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('booking_code', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by status
+        if ($status = $request->get('status')) {
+            $query->where('status', $status);
+        }
+
+        // Filter by payment status
+        if ($paymentStatus = $request->get('payment_status')) {
+            $query->where('payment_status', $paymentStatus);
+        }
+
+        // Filter by date range
+        if ($dateFrom = $request->get('date_from')) {
+            $query->whereDate('check_in', '>=', $dateFrom);
+        }
+        if ($dateTo = $request->get('date_to')) {
+            $query->whereDate('check_out', '<=', $dateTo);
+        }
+
+        $bookings = $query->recent()->paginate(20);
 
         return view('admin.bookings.index', compact('bookings'));
     }
