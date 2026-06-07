@@ -24,6 +24,7 @@ class Booking extends Model
         'payment_status',
         'payment_method',
         'paid_at',
+        'payment_due_at',
         'source',
     ];
 
@@ -34,6 +35,7 @@ class Booking extends Model
         'room_id' => 'integer',
         'total_amount' => 'decimal:2',
         'paid_at' => 'datetime',
+        'payment_due_at' => 'datetime',
     ];
 
     protected static function booted(): void
@@ -78,6 +80,25 @@ class Booking extends Model
     public function scopeByCode($query, string $code)
     {
         return $query->where('booking_code', $code);
+    }
+
+    public function scopePaymentDueExpired($query)
+    {
+        return $query->where('status', 'pending')
+            ->where('payment_due_at', '<=', now())
+            ->where(function ($q) {
+                $q->where('payment_status', '!=', 'paid')
+                    ->orWhereNull('payment_status');
+            });
+    }
+
+    public function scopeAwaitingPayment($query)
+    {
+        return $query->where('payment_due_at', '>', now())
+            ->where(function ($q) {
+                $q->where('payment_status', '!=', 'paid')
+                    ->orWhereNull('payment_status');
+            });
     }
 
     public function nights(): int

@@ -10,3 +10,6 @@ Artisan::command('inspire', function () {
 
 // Sinkronisasi harga tipe kamar dari PMS setiap 6 jam
 Schedule::command('pms:sync-prices')->everySixHours()->appendOutputTo(storage_path('logs/pms-sync.log'));
+
+// Batalkan otomatis booking yang sudah melebihi batas pembayaran 3 jam
+Schedule::command('booking:auto-cancel-expired')->everyMinute()->appendOutputTo(storage_path('logs/booking-auto-cancel.log'));

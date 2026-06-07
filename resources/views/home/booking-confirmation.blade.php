@@ -23,6 +23,20 @@
             <p class="text-gray-500">Your booking request has been received. Please complete the payment to secure your room.</p>
         </div>
 
+        {{-- Payment Deadline Alert --}}
+        @if($booking->payment_due_at && $booking->payment_status !== 'paid')
+        <div class="bg-red-50 border border-red-200 text-red-700 rounded-2xl p-5 mb-6 flex items-start gap-3">
+            <i class="fa-solid fa-clock text-xl mt-0.5"></i>
+            <div>
+                <p class="font-semibold">⚠️ Payment Deadline: {{ $booking->payment_due_at->format('H:i') }} (3 hours)</p>
+                <p class="text-sm text-red-600 mt-1">
+                    Please complete your payment before <strong>{{ $booking->payment_due_at->format('H:i') }} WIB</strong>. 
+                    Your booking will be <strong>automatically cancelled</strong> if payment is not confirmed within <strong>3 hours</strong>.
+                </p>
+            </div>
+        </div>
+        @endif
+
         {{-- Booking Summary Card --}}
         <div class="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
             <div class="p-6 border-b bg-navy-800 text-white">

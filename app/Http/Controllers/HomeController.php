@@ -135,6 +135,7 @@ class HomeController extends Controller
             'room_id' => $validated['room_id'] ?? null,
             'notes' => $validated['notes'] ?? '',
             'status' => 'pending',
+            'payment_due_at' => now()->addHours(3),
             'source' => 'website',
         ]);
 

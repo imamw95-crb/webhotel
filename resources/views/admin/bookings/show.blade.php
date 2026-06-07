@@ -39,7 +39,8 @@
                         {{ $booking->payment_status === 'paid' ? 'bg-green-100 text-green-700' : '' }}
                         {{ $booking->payment_status === 'pending' ? 'bg-yellow-100 text-yellow-700' : '' }}
                         {{ $booking->payment_status === 'unpaid' ? 'bg-gray-100 text-gray-600' : '' }}
-                        {{ $booking->payment_status === 'failed' ? 'bg-red-100 text-red-700' : '' }}">
+                        {{ $booking->payment_status === 'failed' ? 'bg-red-100 text-red-700' : '' }}
+                        {{ $booking->payment_status === 'expired' ? 'bg-red-100 text-red-700' : '' }}">
                         {{ ucfirst($booking->payment_status) }}
                     </span>
                     @if($booking->payment_method)
@@ -47,6 +48,18 @@
                     @endif
                 </dd>
             </div>
+            @if($booking->payment_due_at && $booking->payment_status !== 'paid' && $booking->status === 'pending')
+            <div>
+                <dt class="text-xs text-gray-400 uppercase font-medium">Payment Due</dt>
+                <dd class="text-gray-800">
+                    <span class="text-red-600 font-medium">
+                        <i class="fa-solid fa-clock"></i>
+                        {{ $booking->payment_due_at->format('d M Y H:i') }}
+                    </span>
+                    <p class="text-xs text-gray-400 mt-0.5">Auto-cancel if unpaid after deadline</p>
+                </dd>
+            </div>
+            @endif
         </dl>
 
         <hr class="my-6">

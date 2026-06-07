@@ -94,6 +94,18 @@
                             {{ ucfirst($booking->payment_status ?? 'pending') }}
                         </p>
                     </div>
+                    @if($booking->payment_due_at && $booking->payment_status !== 'paid' && $booking->status === 'pending')
+                    <div class="track-detail-item" style="grid-column:1/-1;">
+                        <div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:10px 14px;">
+                            <p style="font-size:11px;color:#f87171;text-transform:uppercase;font-weight:500;margin-bottom:2px;">
+                                <i class="fa-solid fa-clock"></i> Payment Deadline
+                            </p>
+                            <p style="color:#ef4444;margin:0;font-weight:600;font-size:14px;">
+                                {{ $booking->payment_due_at->format('H:i') }} WIB — Auto-cancelled if unpaid
+                            </p>
+                        </div>
+                    </div>
+                    @endif
                 </div>
 
                 @if($booking->notes)

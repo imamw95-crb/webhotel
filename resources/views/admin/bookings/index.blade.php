@@ -29,6 +29,7 @@
                 <option value="unpaid" {{ request('payment_status') === 'unpaid' ? 'selected' : '' }}>Unpaid</option>
                 <option value="pending" {{ request('payment_status') === 'pending' ? 'selected' : '' }}>Pending</option>
                 <option value="failed" {{ request('payment_status') === 'failed' ? 'selected' : '' }}>Failed</option>
+                <option value="expired" {{ request('payment_status') === 'expired' ? 'selected' : '' }}>Expired</option>
             </select>
         </div>
         <div class="flex items-end gap-2">
@@ -98,7 +99,8 @@
                                 {{ $booking->payment_status === 'paid' ? 'bg-green-100 text-green-700' : '' }}
                                 {{ $booking->payment_status === 'pending' ? 'bg-yellow-100 text-yellow-700' : '' }}
                                 {{ $booking->payment_status === 'unpaid' ? 'bg-gray-100 text-gray-600' : '' }}
-                                {{ $booking->payment_status === 'failed' ? 'bg-red-100 text-red-700' : '' }}">
+                                {{ $booking->payment_status === 'failed' ? 'bg-red-100 text-red-700' : '' }}
+                                {{ $booking->payment_status === 'expired' ? 'bg-red-100 text-red-700' : '' }}">
                                 {{ ucfirst($booking->payment_status) }}
                             </span>
                             @if($booking->payment_method)
