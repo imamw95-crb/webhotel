@@ -41,15 +41,21 @@ class HomeController extends Controller
             'logo_path' => WebsiteSetting::getValue('logo_path', 'logo/icon.png'),
         ];
 
-        // Generate math captcha
+        // Generate math captcha for booking form
         $num1 = rand(2, 10);
         $num2 = rand(2, 10);
         session()->put('booking_captcha', $num1 + $num2);
         $captchaQuestion = "{$num1} + {$num2} = ?";
 
+        // Generate math captcha for contact form
+        $cNum1 = rand(2, 10);
+        $cNum2 = rand(2, 10);
+        session()->put('contact_captcha', $cNum1 + $cNum2);
+        $contactCaptchaQuestion = "{$cNum1} + {$cNum2} = ?";
+
         return view('home.index', compact(
             'sections', 'facilities', 'galleryImages', 'roomTypes',
-            'pmsRoomTypes', 'settings', 'captchaQuestion'
+            'pmsRoomTypes', 'settings', 'captchaQuestion', 'contactCaptchaQuestion'
         ));
     }
 
@@ -58,6 +64,12 @@ class HomeController extends Controller
         // Honeypot anti-spam
         if (! empty($request->website)) {
             return back()->with('success', 'Thank you for your message!');
+        }
+
+        // Math captcha validation
+        $expectedAnswer = session()->pull('contact_captcha');
+        if ($expectedAnswer === null || (int) $request->input('contact_captcha_answer') !== $expectedAnswer) {
+            return back()->withErrors(['contact_captcha_answer' => 'Math verification failed. Please try again.'])->withInput();
         }
 
         $validated = $request->validate([

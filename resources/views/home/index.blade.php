@@ -301,6 +301,18 @@
                         <label class="form-label">Message *</label>
                         <textarea name="message" rows="5" required class="form-input form-textarea" placeholder="Tell us what you need...">{{ old('message') }}</textarea>
                     </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Verification *</label>
+                        <div class="captcha-row">
+                            <span class="captcha-question">{{ $contactCaptchaQuestion }}</span>
+                            <input type="text" name="contact_captcha_answer" required class="form-input captcha-input" placeholder="Your answer">
+                        </div>
+                        @error('contact_captcha_answer')
+                            <p class="form-error">{{ $message }}</p>
+                        @enderror
+                    </div>
+
                     <button type="submit" class="btn-gold form-submit">
                         <i class="fa-solid fa-paper-plane"></i> Send Message
                     </button>
@@ -451,6 +463,38 @@
     margin-top: 8px;
 }
 
+.form-error {
+    font-size: 13px;
+    color: #ef4444;
+    margin-top: 6px;
+}
+
+/* ---- Math Captcha ---- */
+.captcha-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.captcha-question {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--gold-primary);
+    background: rgba(201, 168, 76, 0.1);
+    border: 1px solid rgba(201, 168, 76, 0.2);
+    border-radius: var(--radius-md);
+    padding: 10px 18px;
+    white-space: nowrap;
+    min-width: 80px;
+    text-align: center;
+}
+
+.captcha-input {
+    flex: 1;
+    min-width: 0;
+}
+
 /* ---- Responsive ---- */
 @media (max-width: 1024px) {
     .contact-layout {
@@ -471,3 +515,5 @@
 }
 </style>
 @endpush
+
+
