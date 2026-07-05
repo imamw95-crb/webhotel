@@ -135,7 +135,12 @@
                         <div class="flex items-start justify-between">
                             <div>
                                 <p class="text-sm text-gray-400 uppercase font-medium">Bank</p>
-                                <p class="font-bold text-lg text-navy-800">{{ $bank['name'] }}</p>
+                                <p class="font-bold text-lg text-navy-800 flex items-center gap-2">
+                                    @if(str_contains($bank['name'], 'BCA'))
+                                        <img src="{{ asset('images/bca-logo.svg') }}" alt="BCA" class="h-7">
+                                    @endif
+                                    {{ $bank['name'] }}
+                                </p>
                             </div>
                             <div class="text-right">
                                 <p class="text-sm text-gray-400 uppercase font-medium">Account Number</p>
