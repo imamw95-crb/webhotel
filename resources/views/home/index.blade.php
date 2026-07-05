@@ -244,6 +244,21 @@
                             </div>
                         </div>
                     @endif
+                    @if($settings['whatsapp'] ?? false)
+                        <div class="contact-item">
+                            <div class="contact-icon"><i class="fa-brands fa-whatsapp" style="color:#25D366"></i></div>
+                            <div>
+                                <p class="contact-item-label">WhatsApp</p>
+                                <p class="contact-item-text">
+                                    <a href="https://api.whatsapp.com/send?phone={{ $settings['whatsapp'] }}&text={{ urlencode('Halo, saya ingin bertanya tentang kamar di ' . ($settings['hotel_name'] ?? 'The Icon Hotel')) }}"
+                                       target="_blank" rel="noopener noreferrer"
+                                       class="hover:text-green-600 transition-colors">
+                                        {{ $settings['whatsapp'] }}
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                    @endif
                     @if($settings['email'] ?? false)
                         <div class="contact-item">
                             <div class="contact-icon"><i class="fa-solid fa-envelope"></i></div>
