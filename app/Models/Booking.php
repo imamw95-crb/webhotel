@@ -17,6 +17,7 @@ class Booking extends Model
         'check_out',
         'guests',
         'total_amount',
+        'unique_code',
         'room_type',
         'room_id',
         'notes',
@@ -34,6 +35,7 @@ class Booking extends Model
         'guests' => 'integer',
         'room_id' => 'integer',
         'total_amount' => 'decimal:2',
+        'unique_code' => 'integer',
         'paid_at' => 'datetime',
         'payment_due_at' => 'datetime',
     ];
@@ -99,6 +101,11 @@ class Booking extends Model
                 $q->where('payment_status', '!=', 'paid')
                     ->orWhereNull('payment_status');
             });
+    }
+
+    public function totalWithUnique(): float
+    {
+        return (float) $this->total_amount + (int) ($this->unique_code ?? 0);
     }
 
     public function nights(): int

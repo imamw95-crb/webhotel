@@ -133,6 +133,7 @@ class HomeController extends Controller
         $checkOut = Carbon::parse($validated['check_out']);
         $nights = max($checkIn->diffInDays($checkOut), 1);
         $totalAmount = (float) $pricePerNight * $nights;
+        $uniqueCode = random_int(100, 999);
 
         // Save booking to local database
         $booking = Booking::create([
@@ -143,6 +144,7 @@ class HomeController extends Controller
             'check_out' => $validated['check_out'],
             'guests' => $validated['guests'],
             'total_amount' => $totalAmount,
+            'unique_code' => $uniqueCode,
             'room_type' => $validated['room_type'] ?? null,
             'room_id' => $validated['room_id'] ?? null,
             'notes' => $validated['notes'] ?? '',

@@ -100,6 +100,18 @@
                             Rp {{ number_format($booking->total_amount ?? 0, 0, ',', '.') }}
                         </span>
                     </div>
+                    @if($booking->unique_code)
+                    <div class="flex justify-between items-center pt-2 border-t border-dashed mt-2">
+                        <span class="text-gray-500 text-sm">Unique Code</span>
+                        <span class="font-mono font-bold text-lg text-orange-500">Rp {{ number_format($booking->unique_code, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between items-center pt-2 border-t-2 border-navy-800 mt-2">
+                        <span class="text-navy-800 font-bold">Total to Transfer</span>
+                        <span class="font-bold text-2xl text-green-600">
+                            Rp {{ number_format($booking->totalWithUnique(), 0, ',', '.') }}
+                        </span>
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -146,9 +158,18 @@
                     <div class="flex justify-between items-center">
                         <span class="text-gray-600 font-medium">Total to Transfer:</span>
                         <span class="font-bold text-xl text-gold-400">
-                            Rp {{ number_format($booking->total_amount ?? 0, 0, ',', '.') }}
+                            @if($booking->unique_code)
+                                Rp {{ number_format($booking->totalWithUnique(), 0, ',', '.') }}
+                            @else
+                                Rp {{ number_format($booking->total_amount ?? 0, 0, ',', '.') }}
+                            @endif
                         </span>
                     </div>
+                    @if($booking->unique_code)
+                    <div class="mt-2 text-xs text-gray-400">
+                        (Rp {{ number_format($booking->total_amount, 0, ',', '.') }} + unique code Rp {{ number_format($booking->unique_code, 0, ',', '.') }})
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -169,7 +190,7 @@
                         <span class="flex-shrink-0 w-8 h-8 bg-gold-400 text-navy-900 rounded-full flex items-center justify-center font-bold text-sm">1</span>
                         <div>
                             <p class="font-semibold text-navy-800">Transfer the payment</p>
-                            <p class="text-sm text-gray-500">Transfer exactly <strong>Rp {{ number_format($booking->total_amount ?? 0, 0, ',', '.') }}</strong> to one of the bank accounts above.</p>
+                            <p class="text-sm text-gray-500">Transfer exactly <strong>Rp {{ number_format($booking->totalWithUnique(), 0, ',', '.') }}</strong> to one of the bank accounts above.</p>
                         </div>
                     </li>
                     <li class="flex gap-4">
