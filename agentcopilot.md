@@ -66,6 +66,7 @@ database/ — migrations/ (13 files), seeders/
 ## Services
 
 - **PmsApiService** — HTTP client with X-API-Key. Methods: `getRooms()`, `getAvailableRooms(in,out)`, `getRoomTypes()`, `createReservation(data)`, `clearCache()`. Cached 300s.
+  - **⚠️ ALLOTMENT LOGIC (PMS-side):** Hanya tipe kamar yang punya allotment (channel='api') yang tampil. Tipe tanpa allotment tidak tampil. Jumlah tampil = `min(allotment - booked)` di range tanggal. `limitAvailablePerType()` sudah TIDAK dipakai.
 - **MidtransService** — `getSnapToken(booking)`, `handleNotification(array)`. OrderID: `BOOK-{CODE}-{ts}`. Handles: capture, settlement, deny, cancel, expire, pending.
 - **ReCaptchaService** — Google reCAPTCHA v2 verification.
 
