@@ -170,6 +170,7 @@ class HomeController extends Controller
             'check_in' => $validated['check_in'],
             'check_out' => $validated['check_out'],
             'guest_count' => $validated['guests'],
+            'total_amount' => $totalAmount,
             'notes' => $validated['notes'] ?? '',
             'ota_source' => 'website',
             'ota_reservation_number' => $booking->booking_code,
