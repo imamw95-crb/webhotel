@@ -266,7 +266,7 @@
             <a href="{{ route('payment.pay', $booking) }}"
                class="inline-flex items-center justify-center gap-2 bg-gold-400 hover:bg-gold-500 text-navy-900 font-semibold px-6 py-3 rounded-xl transition">
                 <i class="fa-solid fa-credit-card"></i>
-                Alternative Payment (Midtrans)
+                Bayar Sekarang
             </a>
             <a href="{{ url('/#hero') }}"
                class="inline-flex items-center justify-center gap-2 border border-gray-300 hover:border-gray-400 text-gray-600 font-semibold px-6 py-3 rounded-xl transition">

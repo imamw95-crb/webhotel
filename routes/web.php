@@ -37,9 +37,10 @@ Route::get('/booking/{booking}/confirmation', [HomeController::class, 'bookingCo
 // Payment pages
 Route::get('/payment', [PaymentController::class, 'index'])->name('payment.index');
 Route::get('/payment/{booking}', [PaymentController::class, 'pay'])->name('payment.pay');
-Route::post('/payment/notification', [PaymentController::class, 'notification'])->name('payment.notification');
-Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');
-Route::get('/payment/failed', [PaymentController::class, 'failed'])->name('payment.failed');
+// Midtrans callbacks — disabled for now
+// Route::post('/payment/notification', [PaymentController::class, 'notification'])->name('payment.notification');
+// Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');
+// Route::get('/payment/failed', [PaymentController::class, 'failed'])->name('payment.failed');
 
 /*
 |--------------------------------------------------------------------------
