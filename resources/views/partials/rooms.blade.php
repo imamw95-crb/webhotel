@@ -166,8 +166,6 @@
                         $maxOcc = $room->max_occupancy ?? 2;
                     }
                     $priceNum = is_array($room) ? ($room['base_price'] ?? 0) : ($room->base_price ?? 0);
-                    $availClass = $priceNum > 0 ? 'avail-available' : 'avail-unavailable';
-                    $availText = $priceNum > 0 ? 'Available' : 'Sold Out';
                     $isPopular = $priceNum >= 750000;
                     $isBestValue = $priceNum >= 350000 && $priceNum <= 450000;
                 @endphp
@@ -195,7 +193,6 @@
                         @elseif($isBestValue)
                             <span class="room-badge badge-value"><i class="fa-solid fa-tag"></i> Best Value</span>
                         @endif
-                        <span class="room-badge badge-availability {{ $availClass }}"><span class="avail-dot"></span> {{ $availText }}</span>
                     </div>
 
                     {{-- Curtain Content (slides up on hover) --}}
@@ -413,40 +410,6 @@
     50% { box-shadow: 0 2px 20px rgba(212, 175, 55, 0.7); }
 }
 
-.badge-availability {
-    top: 12px;
-    right: 12px;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.room-card:hover .badge-availability {
-    transform: translateY(-2px);
-}
-
-.avail-dot {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #4ade80;
-    animation: availDotPulse 1.5s ease-in-out infinite;
-}
-
-.avail-unavailable .avail-dot {
-    background: #f87171;
-    animation: none;
-}
-
-@keyframes availDotPulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(0.8); }
-}
-
-.avail-available { color: #4ade80; }
-.avail-unavailable { color: #f87171; }
 
 /* ============================================================
    CURTAIN REVEAL — Content slides up from bottom on hover
@@ -736,13 +699,6 @@
     .badge-value {
         top: 10px;
         left: 10px;
-        font-size: 9px;
-        padding: 4px 10px;
-    }
-
-    .badge-availability {
-        top: 10px;
-        right: 10px;
         font-size: 9px;
         padding: 4px 10px;
     }
